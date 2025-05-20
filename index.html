@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advertise on Recomendo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --yellow: #ffe600;
+            --yellow-dark: #e6c200;
+            --green: #8fd14f;
+            --black: #181818;
+            --white: #fff;
+            --gray: #f7f9fa;
+            --border: #e0e6d9;
+            --review-bg: #f9fafb;
+            --review-border: #e3e8ee;
+            --verified: #8fd14f;
+        }
+        html {
+            box-sizing: border-box;
+        }
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: var(--gray);
+            color: var(--black);
+            margin: 0;
+            padding: 0;
+            font-size: 1.08rem;
+            line-height: 1.7;
+        }
+        header {
+            padding: 3.5rem 0 2.5rem 0;
+            text-align: center;
+            background: var(--white);
+        }
+        .logo {
+            width: 110px;
+            height: 110px;
+            object-fit: contain;
+            border-radius: 50%;
+            border: 3px solid var(--green);
+            margin-bottom: 1.2rem;
+        }
+        h1 {
+            font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+            font-size: 2.3rem;
+            font-weight: 700;
+            margin: 0 0 0.7rem 0;
+            letter-spacing: -0.5px;
+        }
+        .subtitle {
+            font-size: 1.15rem;
+            color: var(--black);
+            margin-bottom: 2.2rem;
+            font-weight: 500;
+        }
+        .ad-options-row {
+            display: flex;
+            gap: 2.2rem;
+            justify-content: center;
+            align-items: stretch;
+            margin: 0 auto 2.7rem auto;
+            max-width: 760px;
+        }
+        .ad-card {
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: 1.5rem;
+            flex: 1 1 0;
+            padding: 2.2rem 2rem 1.7rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            box-shadow: 0 4px 24px 0 rgba(143,209,79,0.08);
+            min-width: 270px;
+        }
+        .ad-card h2 {
+            font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+            font-size: 1.18rem;
+            font-weight: 700;
+            margin: 0 0 0.7rem 0;
+            color: var(--black);
+            letter-spacing: 0.2px;
+        }
+        .price {
+            font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: var(--black);
+            background: var(--yellow);
+            display: inline-block;
+            padding: 0.2em 0.7em;
+            border-radius: 0.5em;
+            margin: 0 0 1.1rem 0;
+            letter-spacing: -1px;
+        }
+        .ad-card ul {
+            margin: 0 0 1.7rem 0;
+            color: var(--black);
+            font-size: 1.04rem;
+            text-align: left;
+            padding-left: 0;
+            list-style: none;
+        }
+        .ad-card li {
+            margin-bottom: 0.55rem;
+            position: relative;
+            padding-left: 1.5em;
+            text-indent: 0;
+        }
+        .ad-card li:before {
+            content: '\2022';
+            position: absolute;
+            left: 0;
+            color: var(--black);
+            font-size: 1.2em;
+            line-height: 1.1;
+            top: 0.1em;
+        }
+        .cta-button {
+            display: block;
+            width: 100%;
+            max-width: 270px;
+            margin: 0 auto;
+            background: var(--green);
+            color: var(--black);
+            font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 2rem;
+            padding: 1rem 2.2rem;
+            font-size: 1.05rem;
+            text-decoration: none;
+            margin-top: auto;
+            transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+            box-shadow: 0 2px 8px 0 rgba(143,209,79,0.10);
+            text-align: center;
+        }
+        .cta-button:hover {
+            background: var(--yellow-dark);
+            color: var(--black);
+            box-shadow: 0 4px 16px 0 rgba(255,230,0,0.13);
+        }
+        .audience-narrative-box {
+            max-width: 760px;
+            margin: 2.7rem auto 0 auto;
+            background: var(--white);
+            border-radius: 1.2rem;
+            padding: 2.2rem 2.2rem 1.7rem 2.2rem;
+            box-shadow: 0 2px 12px 0 rgba(143,209,79,0.04);
+        }
+        .audience-narrative-headline {
+            font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+            font-size: 1.18rem;
+            font-weight: 700;
+            margin: 0 0 1.1rem 0;
+            color: var(--black);
+            letter-spacing: 0.2px;
+        }
+        .audience-narrative {
+            font-size: 1.13rem;
+            color: var(--black);
+            font-weight: 500;
+            margin: 0;
+        }
+        .reviews-section {
+            max-width: 760px;
+            margin: 3.2rem auto 0 auto;
+        }
+        .reviews-headline {
+            font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+            font-size: 1.18rem;
+            font-weight: 700;
+            margin: 0 0 1.1rem 0;
+            color: var(--black);
+            letter-spacing: 0.2px;
+        }
+        .review-card {
+            background: var(--review-bg);
+            border: 1.5px solid var(--review-border);
+            border-radius: 1.1rem;
+            padding: 1.5rem 1.5rem 1.2rem 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px 0 rgba(143,209,79,0.04);
+        }
+        .review-verified {
+            display: inline-block;
+            background: var(--verified);
+            color: var(--black);
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 0.7em;
+            padding: 0.18em 0.9em 0.18em 0.9em;
+            margin-bottom: 0.7em;
+            margin-right: 0.7em;
+            letter-spacing: 0.5px;
+        }
+        .review-quote {
+            font-size: 1.08rem;
+            color: var(--black);
+            margin-bottom: 1.1em;
+            font-weight: 500;
+        }
+        .review-meta {
+            font-size: 0.98rem;
+            color: #666;
+            margin-bottom: 0.2em;
+        }
+        .review-would-sponsor {
+            display: inline-block;
+            color: var(--green);
+            font-weight: 700;
+            font-size: 0.98rem;
+            margin-top: 0.5em;
+            letter-spacing: 0.2px;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 2.2rem;
+            margin: 2.7rem auto 0 auto;
+            max-width: 760px;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat h3 {
+            font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+            font-size: 1.45rem;
+            color: var(--yellow-dark);
+            margin: 0 0 0.18rem 0;
+            font-weight: 700;
+        }
+        .stat p {
+            font-size: 1rem;
+            color: var(--black);
+            opacity: 0.7;
+            margin: 0;
+        }
+        .trust {
+            text-align: center;
+            margin: 3.2rem auto 0 auto;
+            max-width: 600px;
+            font-size: 1.08rem;
+            color: var(--black);
+            opacity: 0.9;
+            font-weight: 500;
+        }
+        footer {
+            padding: 2.2rem 0 1.2rem 0;
+            text-align: center;
+            color: var(--black);
+            font-size: 1rem;
+            background: var(--white);
+            margin-top: 3.2rem;
+            border-top: 1.5px solid var(--green);
+            letter-spacing: 0.2px;
+        }
+        a {
+            color: var(--black);
+            text-decoration: underline;
+        }
+        a:hover {
+            color: var(--green);
+        }
+        @media (max-width: 900px) {
+            .ad-options-row, .stats-row {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            .audience-narrative-box {
+                padding: 1.2rem 1rem 1rem 1rem;
+            }
+            .cta-button {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="reco-logo.jpg" alt="Recomendo Logo" class="logo">
+        <h1>Advertise on Recomendo</h1>
+        <div class="subtitle">Reach 114,000+ engaged subscribers</div>
+        <div class="ad-options-row">
+            <div class="ad-card">
+                <h2>Sponsored Post</h2>
+                <div class="price">$600</div>
+                <ul>
+                    <li>Premium placement at newsletter top</li>
+                    <li>280 characters (text only)</li>
+                    <li>Maximum visibility</li>
+                    <li>Higher click-through rates</li>
+                </ul>
+                <a href="mailto:markfrauenfelder@gmail.com?subject=Premium%20Sponsorship%20Inquiry" class="cta-button">Secure a date</a>
+            </div>
+            <div class="ad-card">
+                <h2>Unclassified Ad</h2>
+                <div class="price">$200</div>
+                <ul>
+                    <li>Placement in newsletter footer</li>
+                    <li>280 characters (text only)</li>
+                    <li>100-600 clicks per ad</li>
+                    <li>Great value for engaged audience</li>
+                </ul>
+                <a href="https://frauenfelder.typeform.com/to/m5KoDlIY?typeform-source=www.recomendo.com" class="cta-button">Place Ad</a>
+            </div>
+        </div>
+    </header>
+    <div class="audience-narrative-box">
+        <div class="audience-narrative-headline">Who Reads Recomendo?</div>
+        <div class="audience-narrative">
+            <a href="https://recomendo.com" target="_blank" rel="noopener noreferrer"><strong>Recomendo</strong></a> delivers curated recommendations to a global audience of over 114,000 highly engaged, tech-savvy professionals. Our readers span 200+ countries, with a strong U.S. presence (51% of subscribers, especially in California, New York, Texas, Washington, and Florida). We add 2,300+ new subscribers monthly, have 12,300+ dedicated app users, and see nearly 500,000 newsletter views each month. Our open rates consistently exceed 46%, far above industry averages, reflecting the trust and attention of our audience.
+        </div>
+    </div>
+    <div class="reviews-section">
+        <div class="reviews-headline">Featured Advertiser Reviews</div>
+        <div class="review-card">
+            <span class="review-verified">Verified</span>
+            <div class="review-quote">“This was our fourth sponsorship with Recomendo, and all of them have performed very well. CPCs have been under $0.30 every time. Cost per Subscriber has been under $2.75 every time, with two sends under $1.45! Click to subscribe conversion rate is among the highest of any newsletter we've ever sponsored, and the subscribers we get engage at a healthy rate. We'll definitely keep booking with Recomendo.”</div>
+        </div>
+        <div class="review-card">
+            <span class="review-verified">Verified</span>
+            <div class="review-quote">“This is my first campaign with Paved.com and I feel like I got lucky. I know these things don't always hit a home run on the first test. Recomendo has 53k subs, I got 440 clicks, and 18 trials on my side. That's a $20 CPA, half of our high target that we aim for. I'm very happy, and will be booking up spots for the next two months with them to see if I can keep this up.”</div>
+        </div>
+        <div class="review-card">
+            <span class="review-verified">Verified</span>
+            <div class="review-quote">“We were able to achieve a $0.31 CPC (over 600 clicks), which is 76% lower than the estimated CPC for that placement, and 4x as many clicks as the estimated amount. The send brought in over 65 subscribers (at a rate of $3 per sub), and 8 of those subs have become 'valuable' subs for us so far. We'll definitely be sponsor Recomendo again.”</div>
+        </div>
+        <div class="review-card">
+            <span class="review-verified">Verified</span>
+            <div class="review-quote">“We were able to achieve a $0.16 CPC (over 900 clicks), which is 83% lower than the average estimated CPC for that placement. The send brought in nearly 100 subscribers at very favorable rate ($1.45 per), and several of those subs have become 'valuable' subs for us. We'll definitely be booking with Recomendo again.”</div>
+        </div>
+    </div>
+    <div class="stats-row">
+        <div class="stat">
+            <h3>114,000+</h3>
+            <p>Subscribers</p>
+        </div>
+        <div class="stat">
+            <h3>46%+</h3>
+            <p>Open Rate</p>
+        </div>
+        <div class="stat">
+            <h3>2,300+</h3>
+            <p>New Subscribers Monthly</p>
+        </div>
+        <div class="stat">
+            <h3>500,000</h3>
+            <p>Monthly Views</p>
+        </div>
+    </div>
+    <div class="trust">
+        Our readers are curious, tech-savvy professionals who trust our recommendations. All ads are clearly marked as sponsored content while maintaining our clean, minimalist aesthetic.
+    </div>
+    <footer>
+        &copy; 2025 Recomendo. All rights reserved.
+    </footer>
+</body>
+</html> 
