@@ -39,6 +39,8 @@
             padding: 3.5rem 0 2.5rem 0;
             text-align: center;
             background: var(--white);
+            position: relative;
+            z-index: 2;
         }
         .logo {
             width: 110px;
@@ -62,12 +64,15 @@
             font-weight: 500;
         }
         .ad-options-row {
-            display: flex;
+            display: flex !important;
             gap: 2.2rem;
             justify-content: center;
             align-items: stretch;
             margin: 0 auto 2.7rem auto;
             max-width: 760px;
+            flex-wrap: wrap;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
         .ad-card {
             background: var(--white);
@@ -75,11 +80,15 @@
             border-radius: 1.5rem;
             flex: 1 1 0;
             padding: 2.2rem 2rem 1.7rem 2rem;
-            display: flex;
+            display: flex !important;
             flex-direction: column;
             align-items: flex-start;
             box-shadow: 0 4px 24px 0 rgba(143,209,79,0.08);
             min-width: 270px;
+            position: relative;
+            z-index: 1;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
         .ad-card h2 {
             font-family: 'Montserrat', 'Inter', Arial, sans-serif;
@@ -276,12 +285,17 @@
             .ad-options-row, .stats-row {
                 flex-direction: column;
                 gap: 1.5rem;
+                padding: 0 1rem;
             }
             .audience-narrative-box {
                 padding: 1.2rem 1rem 1rem 1rem;
             }
             .cta-button {
                 max-width: 100%;
+            }
+            .ad-card {
+                min-width: auto;
+                width: 100%;
             }
         }
     </style>
@@ -291,28 +305,28 @@
         <img src="reco-logo.jpg" alt="Recomendo Logo" class="logo">
         <h1>Advertise on Recomendo</h1>
         <div class="subtitle">Reach 114,000+ engaged subscribers</div>
-        <div class="ad-options-row">
-            <div class="ad-card">
-                <h2>Sponsored Post</h2>
-                <div class="price">$600</div>
-                <ul>
-                    <li>Premium placement at newsletter top</li>
-                    <li>280 characters (text only)</li>
-                    <li>Maximum visibility</li>
-                    <li>Higher click-through rates</li>
+        <div style="display: flex; gap: 2.2rem; justify-content: center; align-items: stretch; margin: 0 auto 2.7rem auto; max-width: 760px; flex-wrap: wrap;">
+            <div style="background: white; border: 1.5px solid #e0e6d9; border-radius: 1.5rem; flex: 1 1 0; padding: 2.2rem 2rem 1.7rem 2rem; display: flex; flex-direction: column; align-items: flex-start; box-shadow: 0 4px 24px 0 rgba(143,209,79,0.08); min-width: 270px; position: relative; z-index: 9999;">
+                <h2 style="font-family: 'Montserrat', 'Inter', Arial, sans-serif; font-size: 1.18rem; font-weight: 700; margin: 0 0 0.7rem 0; color: #181818; letter-spacing: 0.2px;">Sponsored Post</h2>
+                <div style="font-family: 'Montserrat', 'Inter', Arial, sans-serif; font-size: 2.1rem; font-weight: 700; color: #181818; background: #ffe600; display: inline-block; padding: 0.2em 0.7em; border-radius: 0.5em; margin: 0 0 1.1rem 0; letter-spacing: -1px;">$600</div>
+                <ul style="margin: 0 0 1.7rem 0; color: #181818; font-size: 1.04rem; text-align: left; padding-left: 0; list-style: none;">
+                    <li style="margin-bottom: 0.55rem; position: relative; padding-left: 1.5em; text-indent: 0;">Premium placement at newsletter top</li>
+                    <li style="margin-bottom: 0.55rem; position: relative; padding-left: 1.5em; text-indent: 0;">280 characters (text only)</li>
+                    <li style="margin-bottom: 0.55rem; position: relative; padding-left: 1.5em; text-indent: 0;">Maximum visibility</li>
+                    <li style="margin-bottom: 0.55rem; position: relative; padding-left: 1.5em; text-indent: 0;">Higher click-through rates</li>
                 </ul>
-                <a href="mailto:markfrauenfelder@gmail.com?subject=Premium%20Sponsorship%20Inquiry" class="cta-button">Secure a date</a>
+                <a href="mailto:markfrauenfelder@gmail.com?subject=Premium%20Sponsorship%20Inquiry" style="display: block; width: 100%; max-width: 270px; margin: 0 auto; background: #8fd14f; color: #181818; font-family: 'Montserrat', 'Inter', Arial, sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border: none; border-radius: 2rem; padding: 1rem 2.2rem; font-size: 1.05rem; text-decoration: none; margin-top: auto; transition: background 0.18s, color 0.18s, box-shadow 0.18s; box-shadow: 0 2px 8px 0 rgba(143,209,79,0.10); text-align: center;">Secure a date</a>
             </div>
-            <div class="ad-card">
-                <h2>Unclassified Ad</h2>
-                <div class="price">$200</div>
-                <ul>
-                    <li>Placement in newsletter footer</li>
-                    <li>280 characters (text only)</li>
-                    <li>100-600 clicks per ad</li>
-                    <li>Great value for engaged audience</li>
+            <div style="background: white; border: 1.5px solid #e0e6d9; border-radius: 1.5rem; flex: 1 1 0; padding: 2.2rem 2rem 1.7rem 2rem; display: flex; flex-direction: column; align-items: flex-start; box-shadow: 0 4px 24px 0 rgba(143,209,79,0.08); min-width: 270px; position: relative; z-index: 9999;">
+                <h2 style="font-family: 'Montserrat', 'Inter', Arial, sans-serif; font-size: 1.18rem; font-weight: 700; margin: 0 0 0.7rem 0; color: #181818; letter-spacing: 0.2px;">Unclassified Ad</h2>
+                <div style="font-family: 'Montserrat', 'Inter', Arial, sans-serif; font-size: 2.1rem; font-weight: 700; color: #181818; background: #ffe600; display: inline-block; padding: 0.2em 0.7em; border-radius: 0.5em; margin: 0 0 1.1rem 0; letter-spacing: -1px;">$200</div>
+                <ul style="margin: 0 0 1.7rem 0; color: #181818; font-size: 1.04rem; text-align: left; padding-left: 0; list-style: none;">
+                    <li style="margin-bottom: 0.55rem; position: relative; padding-left: 1.5em; text-indent: 0;">Placement in newsletter footer</li>
+                    <li style="margin-bottom: 0.55rem; position: relative; padding-left: 1.5em; text-indent: 0;">280 characters (text only)</li>
+                    <li style="margin-bottom: 0.55rem; position: relative; padding-left: 1.5em; text-indent: 0;">100-600 clicks per ad</li>
+                    <li style="margin-bottom: 0.55rem; position: relative; padding-left: 1.5em; text-indent: 0;">Great value for engaged audience</li>
                 </ul>
-                <a href="https://frauenfelder.typeform.com/to/m5KoDlIY?typeform-source=www.recomendo.com" class="cta-button">Place Ad</a>
+                <a href="https://frauenfelder.typeform.com/to/m5KoDlIY?typeform-source=www.recomendo.com" style="display: block; width: 100%; max-width: 270px; margin: 0 auto; background: #8fd14f; color: #181818; font-family: 'Montserrat', 'Inter', Arial, sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border: none; border-radius: 2rem; padding: 1rem 2.2rem; font-size: 1.05rem; text-decoration: none; margin-top: auto; transition: background 0.18s, color 0.18s, box-shadow 0.18s; box-shadow: 0 2px 8px 0 rgba(143,209,79,0.10); text-align: center;">Place Ad</a>
             </div>
         </div>
     </header>
@@ -365,5 +379,18 @@
     <footer>
         &copy; 2025 Recomendo. All rights reserved.
     </footer>
+    
+    <script>
+        // Simple check to ensure the ad section exists
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, checking for ad section...');
+            const adSection = document.querySelector('div[style*="display: flex"]');
+            if (adSection) {
+                console.log('Ad section found and visible');
+            } else {
+                console.log('Ad section not found');
+            }
+        });
+    </script>
 </body>
 </html> 
