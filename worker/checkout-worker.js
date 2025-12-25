@@ -385,8 +385,7 @@ async function sendNotificationEmail(env, orderData, session) {
           </div>
           <div style="font-size:14px;color:#666;margin-bottom:12px;">Issue #${item.issueNumber} · ${item.dateFormatted}</div>
           <div style="font-size:12px;text-transform:uppercase;color:#999;margin-bottom:4px;">Ad Copy:</div>
-          <div style="font-size:14px;line-height:1.5;margin-bottom:12px;white-space:pre-wrap;">${escapeHtml(item.adCopy)}</div>
-          <div style="font-size:12px;"><a href="${escapeHtml(item.adUrl)}" style="color:#8fd14f;">${escapeHtml(item.adUrl)}</a></div>
+          <div style="font-size:14px;line-height:1.5;margin-bottom:12px;">${formatAdCopy(item.adCopy, item.adUrl)}</div>
         </div>
       `).join('')}
 
@@ -465,9 +464,8 @@ async function sendNotificationEmail(env, orderData, session) {
             <span style="float:right;font-weight:700;">$${item.price}</span>
           </div>
           <div style="font-size:14px;color:#666;margin-bottom:12px;">Issue #${item.issueNumber} · ${item.dateFormatted}</div>
-          <div style="font-size:11px;text-transform:uppercase;color:#999;margin-bottom:4px;">Your Ad Copy:</div>
-          <div style="font-size:14px;line-height:1.5;margin-bottom:8px;padding:12px;background:white;border-radius:4px;white-space:pre-wrap;">${escapeHtml(item.adCopy)}</div>
-          <div style="font-size:13px;"><span style="color:#888;">Link:</span> <a href="${escapeHtml(item.adUrl)}" style="color:#8fd14f;">${escapeHtml(item.adUrl)}</a></div>
+          <div style="font-size:11px;text-transform:uppercase;color:#999;margin-bottom:4px;">Your Ad (as it will appear):</div>
+          <div style="font-size:14px;line-height:1.5;padding:12px;background:white;border-radius:4px;">${formatAdCopy(item.adCopy, item.adUrl)}</div>
         </div>
       `).join('')}
 
@@ -522,6 +520,24 @@ function escapeHtml(text) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+/**
+ * Format ad copy with **bold** and [[link]] syntax
+ */
+function formatAdCopy(text, url) {
+  if (!text) return '';
+  // First escape HTML
+  let formatted = escapeHtml(text);
+  // Convert **text** to <strong>text</strong>
+  formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Convert [[text]] to a link
+  if (url) {
+    formatted = formatted.replace(/\[\[(.+?)\]\]/g, `<a href="${escapeHtml(url)}" style="color:#8fd14f;text-decoration:underline;">$1</a>`);
+  } else {
+    formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span style="color:#8fd14f;text-decoration:underline;">$1</span>');
+  }
+  return formatted;
 }
 
 /**
