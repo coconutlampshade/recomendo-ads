@@ -622,9 +622,9 @@
             <h3>Writing Tips</h3>
             <ul>
               <li><strong>Bold your product name</strong> — Use <code>**double asterisks**</code> around text to make it bold (e.g., <code>**Acme Widget**</code>)</li>
+              <li><strong>Add your link</strong> — Use <code>[[double brackets]]</code> around the words you want as your clickable link (e.g., <code>[[Try it free]]</code>)</li>
               <li><strong>Keep it conversational</strong> — Write like you're recommending to a friend, matching Recomendo's tone</li>
               <li><strong>Lead with the benefit</strong> — What problem does your product solve?</li>
-              <li><strong>One clear link</strong> — Your destination URL is where readers will click</li>
               <li><strong>You can edit later</strong> — We'll send you a confirmation email with your ad copy. Reply to make changes before your issue date.</li>
             </ul>
           </div>
@@ -798,7 +798,7 @@
               data-item-id="${item.id}"
               maxlength="280"
               required
-              placeholder="Write your ad copy here (280 characters max)...&#10;&#10;Example: **Acme Widget** makes organizing your life effortless. Join 50,000+ happy users who save 2 hours every week."
+              placeholder="Write your ad copy here (280 characters max)...&#10;&#10;Example: **Acme Widget** makes organizing your life effortless. Join 50,000+ happy users. [[Try it free]]"
               oninput="updateCharCount(this); updatePreview(${index})"
             ></textarea>
             <div class="char-count" id="charCount_${index}">0 / 280</div>
@@ -816,7 +816,7 @@
               onblur="normalizeUrl(this)"
               oninput="updatePreview(${index})"
             >
-            <div class="field-hint">Where should readers go when they click your ad?</div>
+            <div class="field-hint">Where your [[link]] will go when clicked</div>
           </div>
 
           <div class="ad-preview-section">
@@ -937,33 +937,25 @@
         return div.innerHTML;
       }
 
-      // Parse **bold** markdown
-      function formatText(text) {
+      // Format the ad copy with **bold** and [[links]]
+      function formatText(text, url) {
         let escaped = escapeHtml(text);
         // Replace **text** with <strong>text</strong>
         escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        // Replace [[text]] with link (use URL if provided, otherwise just style it)
+        if (url) {
+          escaped = escaped.replace(/\[\[(.+?)\]\]/g, '<a href="' + escapeHtml(url) + '" class="ad-link" target="_blank">$1</a>');
+        } else {
+          escaped = escaped.replace(/\[\[(.+?)\]\]/g, '<span class="ad-link">$1</span>');
+        }
         return escaped;
       }
 
       // Format the ad copy
-      let formattedCopy = formatText(adCopy);
+      let formattedCopy = formatText(adCopy, adUrl);
 
       // Build the preview HTML
-      let previewHtml = `<span class="ad-text">${formattedCopy}</span>`;
-
-      // Add the link if URL is provided
-      if (adUrl) {
-        let displayUrl = adUrl;
-        // Clean up URL for display (remove protocol)
-        displayUrl = displayUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
-        // Truncate if too long
-        if (displayUrl.length > 40) {
-          displayUrl = displayUrl.substring(0, 37) + '...';
-        }
-        previewHtml += ` <span class="ad-link">${escapeHtml(displayUrl)}</span>`;
-      }
-
-      previewEl.innerHTML = previewHtml;
+      previewEl.innerHTML = `<span class="ad-text">${formattedCopy}</span>`;
     }
 
     function normalizeUrl(input) {
