@@ -657,8 +657,8 @@
   </footer>
 
   <script>
-    // Load config and update page dynamically
-    fetch('config.json')
+    // Load config from worker and update page dynamically
+    fetch('https://recomendo-ads-checkout.markfrauenfelder.workers.dev/config')
       .then(response => response.json())
       .then(config => {
         // Update stats

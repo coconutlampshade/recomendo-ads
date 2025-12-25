@@ -73,6 +73,19 @@ export default {
       return handleDeleteAd(request, env);
     }
 
+    if (url.pathname === '/config') {
+      return handleGetConfig(request, env);
+    }
+
+    if (url.pathname === '/admin/config') {
+      if (request.method === 'GET') {
+        return handleGetConfig(request, env);
+      }
+      if (request.method === 'PUT' || request.method === 'POST') {
+        return handleUpdateConfig(request, env);
+      }
+    }
+
     return new Response('Not Found', { status: 404 });
   }
 };
@@ -777,4 +790,121 @@ async function getCancelledAds(env) {
   if (!env.ORDERS_KV) return [];
   const cancelledJson = await env.ORDERS_KV.get('cancelled_ads');
   return cancelledJson ? JSON.parse(cancelledJson) : [];
+}
+
+/**
+ * Default config (used if none stored in KV)
+ */
+const DEFAULT_CONFIG = {
+  stats: {
+    subscribers: "122,000+",
+    openRate: "46%"
+  },
+  pricing: {
+    premium: 500,
+    unclassified: 200
+  },
+  contact: {
+    email: "editor@kk.org"
+  },
+  testimonials: [
+    {
+      quote: "This placement generated nearly 1,000 clicks, which is 5x more than the estimated amount of clicks. Those clicks yielded over 105 subscribers.",
+      company: "Brad's Deals"
+    },
+    {
+      quote: "We ran a sponsorship with Recomendo. It ran very smoothly, and we liked the quality of the newsletter. We also got the amount of clicks expected, which worked out to around $1 a click.",
+      company: "Growth HQ"
+    },
+    {
+      quote: "We've received six signups from this sponsorship and one of them already turned into a customer!",
+      company: "Gerger LLC"
+    },
+    {
+      quote: "We saw 39,512 opens, a 49% open rate, and 233 clicks from this sponsorship with Recomendo. Even though there are no conversions, we are very happy with the performance for the rate and subscriber count.",
+      company: "Resortpass"
+    }
+  ]
+};
+
+/**
+ * Get site config (public endpoint)
+ */
+async function handleGetConfig(request, env) {
+  if (request.method === 'OPTIONS') {
+    return handleCors();
+  }
+
+  try {
+    let config = DEFAULT_CONFIG;
+
+    if (env.ORDERS_KV) {
+      const stored = await env.ORDERS_KV.get('site_config');
+      if (stored) {
+        config = JSON.parse(stored);
+      }
+    }
+
+    return new Response(JSON.stringify(config), {
+      headers: corsHeaders()
+    });
+  } catch (error) {
+    console.error('Config error:', error);
+    return new Response(JSON.stringify(DEFAULT_CONFIG), {
+      headers: corsHeaders()
+    });
+  }
+}
+
+/**
+ * Update site config (admin only)
+ */
+async function handleUpdateConfig(request, env) {
+  if (request.method === 'OPTIONS') {
+    return handleCors();
+  }
+
+  // Check authorization
+  const authHeader = request.headers.get('Authorization');
+  const password = authHeader?.replace('Bearer ', '');
+
+  if (!password || password !== env.ADMIN_PASSWORD) {
+    return new Response('Unauthorized', {
+      status: 401,
+      headers: corsHeaders()
+    });
+  }
+
+  try {
+    const newConfig = await request.json();
+
+    // Validate required fields
+    if (!newConfig.stats || !newConfig.testimonials) {
+      return new Response(JSON.stringify({ error: 'Invalid config format' }), {
+        status: 400,
+        headers: corsHeaders()
+      });
+    }
+
+    // Store in KV
+    if (env.ORDERS_KV) {
+      await env.ORDERS_KV.put('site_config', JSON.stringify(newConfig));
+    } else {
+      return new Response(JSON.stringify({ error: 'KV storage not available' }), {
+        status: 500,
+        headers: corsHeaders()
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: corsHeaders()
+    });
+
+  } catch (error) {
+    console.error('Update config error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to update config' }), {
+      status: 500,
+      headers: corsHeaders()
+    });
+  }
 }

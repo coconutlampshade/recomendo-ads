@@ -156,6 +156,125 @@
       th, td { padding: 10px; }
       .ad-copy { max-width: 150px; }
     }
+
+    /* Config Editor */
+    .config-section {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-top: 30px;
+      overflow: hidden;
+    }
+    .config-section h2 {
+      margin: 0;
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .config-content { padding: 20px; }
+    .config-group {
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #eee;
+    }
+    .config-group:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    .config-group h3 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      text-transform: uppercase;
+      color: #888;
+      letter-spacing: 0.5px;
+    }
+    .config-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .config-field {
+      flex: 1;
+    }
+    .config-field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #555;
+    }
+    .config-field input, .config-field textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .config-field textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    .config-field input:focus, .config-field textarea:focus {
+      outline: none;
+      border-color: #8fd14f;
+    }
+    .testimonial-card-edit {
+      background: #f9f9f9;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .testimonial-card-edit .remove-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: none;
+      border: none;
+      color: #999;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    .testimonial-card-edit .remove-btn:hover { color: #e74c3c; }
+    .add-testimonial-btn {
+      background: #f5f5f5;
+      border: 2px dashed #ddd;
+      padding: 12px;
+      border-radius: 6px;
+      width: 100%;
+      cursor: pointer;
+      font-size: 14px;
+      color: #666;
+    }
+    .add-testimonial-btn:hover {
+      border-color: #8fd14f;
+      color: #333;
+    }
+    .save-config-btn {
+      background: #8fd14f;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .save-config-btn:hover { background: #7ac043; }
+    .save-config-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .save-status {
+      display: inline-block;
+      margin-left: 12px;
+      font-size: 14px;
+    }
+    .save-status.success { color: #27ae60; }
+    .save-status.error { color: #e74c3c; }
   </style>
 </head>
 <body>
@@ -193,6 +312,51 @@
           <div class="loading">Loading orders...</div>
         </div>
       </div>
+
+      <!-- Site Settings -->
+      <div class="config-section">
+        <h2>
+          Site Settings
+          <div>
+            <button class="save-config-btn" onclick="saveConfig()">Save Changes</button>
+            <span class="save-status" id="saveStatus"></span>
+          </div>
+        </h2>
+        <div class="config-content">
+          <!-- Stats -->
+          <div class="config-group">
+            <h3>Newsletter Stats</h3>
+            <div class="config-row">
+              <div class="config-field">
+                <label>Subscribers</label>
+                <input type="text" id="cfg-subscribers" placeholder="e.g. 122,000+">
+              </div>
+              <div class="config-field">
+                <label>Open Rate</label>
+                <input type="text" id="cfg-openrate" placeholder="e.g. 46%">
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact -->
+          <div class="config-group">
+            <h3>Contact</h3>
+            <div class="config-row">
+              <div class="config-field">
+                <label>Contact Email</label>
+                <input type="email" id="cfg-email" placeholder="e.g. editor@kk.org">
+              </div>
+            </div>
+          </div>
+
+          <!-- Testimonials -->
+          <div class="config-group">
+            <h3>Testimonials</h3>
+            <div id="testimonialsList"></div>
+            <button class="add-testimonial-btn" onclick="addTestimonial()">+ Add Testimonial</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -206,6 +370,7 @@
       // Store password and try to fetch orders
       sessionStorage.setItem('adminPass', password);
       fetchOrders(password);
+      fetchConfig();
     }
 
     function logout() {
@@ -364,10 +529,137 @@
       }
     }
 
+    // ============================================
+    // CONFIG EDITOR
+    // ============================================
+
+    let currentConfig = null;
+
+    async function fetchConfig() {
+      const password = sessionStorage.getItem('adminPass');
+      try {
+        const response = await fetch(`${WORKER_URL}/config`);
+        if (response.ok) {
+          currentConfig = await response.json();
+          renderConfigForm();
+        }
+      } catch (err) {
+        console.error('Failed to fetch config:', err);
+      }
+    }
+
+    function renderConfigForm() {
+      if (!currentConfig) return;
+
+      // Populate stats
+      document.getElementById('cfg-subscribers').value = currentConfig.stats?.subscribers || '';
+      document.getElementById('cfg-openrate').value = currentConfig.stats?.openRate || '';
+
+      // Populate contact
+      document.getElementById('cfg-email').value = currentConfig.contact?.email || '';
+
+      // Populate testimonials
+      renderTestimonials();
+    }
+
+    function renderTestimonials() {
+      const container = document.getElementById('testimonialsList');
+      const testimonials = currentConfig.testimonials || [];
+
+      container.innerHTML = testimonials.map((t, i) => `
+        <div class="testimonial-card-edit" data-index="${i}">
+          <button class="remove-btn" onclick="removeTestimonial(${i})">&times;</button>
+          <div class="config-field" style="margin-bottom:12px">
+            <label>Quote</label>
+            <textarea id="testimonial-quote-${i}" onchange="updateTestimonial(${i})">${escapeHtml(t.quote)}</textarea>
+          </div>
+          <div class="config-field">
+            <label>Company</label>
+            <input type="text" id="testimonial-company-${i}" value="${escapeHtml(t.company)}" onchange="updateTestimonial(${i})">
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateTestimonial(index) {
+      const quote = document.getElementById(`testimonial-quote-${index}`).value;
+      const company = document.getElementById(`testimonial-company-${index}`).value;
+      currentConfig.testimonials[index] = { quote, company };
+    }
+
+    function addTestimonial() {
+      if (!currentConfig.testimonials) {
+        currentConfig.testimonials = [];
+      }
+      currentConfig.testimonials.push({ quote: '', company: '' });
+      renderTestimonials();
+    }
+
+    function removeTestimonial(index) {
+      currentConfig.testimonials.splice(index, 1);
+      renderTestimonials();
+    }
+
+    async function saveConfig() {
+      const password = sessionStorage.getItem('adminPass');
+      if (!password) {
+        alert('Please log in again');
+        return;
+      }
+
+      // Gather form data
+      const config = {
+        stats: {
+          subscribers: document.getElementById('cfg-subscribers').value,
+          openRate: document.getElementById('cfg-openrate').value
+        },
+        pricing: currentConfig.pricing || { premium: 500, unclassified: 200 },
+        contact: {
+          email: document.getElementById('cfg-email').value
+        },
+        testimonials: currentConfig.testimonials || []
+      };
+
+      const btn = document.querySelector('.save-config-btn');
+      const status = document.getElementById('saveStatus');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      status.textContent = '';
+
+      try {
+        const response = await fetch(`${WORKER_URL}/admin/config`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${password}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(config)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save');
+        }
+
+        currentConfig = config;
+        status.textContent = 'Saved!';
+        status.className = 'save-status success';
+        setTimeout(() => { status.textContent = ''; }, 3000);
+
+      } catch (err) {
+        console.error('Save error:', err);
+        status.textContent = 'Failed to save';
+        status.className = 'save-status error';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Changes';
+      }
+    }
+
     // Check for saved session
     const savedPass = sessionStorage.getItem('adminPass');
     if (savedPass) {
       fetchOrders(savedPass);
+      fetchConfig();
     }
   </script>
 </body>
