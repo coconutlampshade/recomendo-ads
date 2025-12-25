@@ -335,50 +335,62 @@ async function verifyStripeWebhook(payload, signature, secret) {
  */
 async function sendNotificationEmail(env, orderData, session) {
   const { name, email, company, items } = orderData;
-
-  // Format ad details
-  const adDetails = items.map(item => `
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${item.type === 'premium' ? '🌟 PREMIUM SPONSORSHIP' : '📝 UNCLASSIFIED AD'}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📅 Issue: #${item.issueNumber} — ${item.dateFormatted}
-💰 Price: $${item.price}
-
-📝 AD COPY:
-${item.adCopy}
-
-🔗 URL: ${item.adUrl}
-`).join('\n');
-
   const total = items.reduce((sum, item) => sum + item.price, 0);
+  const orderDate = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
 
-  const emailBody = `
-NEW ADVERTISING ORDER — RECOMENDO
-==================================
+  // HTML for internal notification email
+  const internalHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;">
+  <div style="max-width:600px;margin:0 auto;padding:20px;">
+    <div style="background:#8fd14f;padding:20px;border-radius:8px 8px 0 0;">
+      <h1 style="margin:0;color:#181818;font-size:24px;">New Ad Order!</h1>
+      <p style="margin:8px 0 0;color:#181818;font-size:18px;font-weight:bold;">$${total} received</p>
+    </div>
 
-💳 Payment Received: $${total}
-📧 Stripe Session: ${session.id}
+    <div style="background:white;padding:24px;border-radius:0 0 8px 8px;">
+      <h2 style="margin:0 0 16px;font-size:14px;text-transform:uppercase;color:#888;letter-spacing:1px;">Customer Details</h2>
+      <table style="width:100%;margin-bottom:24px;">
+        <tr><td style="padding:4px 0;color:#666;">Name:</td><td style="padding:4px 0;font-weight:600;">${escapeHtml(name)}</td></tr>
+        <tr><td style="padding:4px 0;color:#666;">Email:</td><td style="padding:4px 0;"><a href="mailto:${escapeHtml(email)}" style="color:#8fd14f;">${escapeHtml(email)}</a></td></tr>
+        ${company ? `<tr><td style="padding:4px 0;color:#666;">Company:</td><td style="padding:4px 0;">${escapeHtml(company)}</td></tr>` : ''}
+      </table>
 
-CUSTOMER DETAILS
-----------------
-Name: ${name}
-Email: ${email}
-Company: ${company || 'Not provided'}
+      <h2 style="margin:0 0 16px;font-size:14px;text-transform:uppercase;color:#888;letter-spacing:1px;">Ad Bookings</h2>
+      ${items.map(item => `
+        <div style="background:#f7f9fa;border-radius:8px;padding:16px;margin-bottom:12px;border-left:4px solid ${item.type === 'premium' ? '#ffe600' : '#8fd14f'};">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-weight:700;color:${item.type === 'premium' ? '#b8860b' : '#333'};">${item.type === 'premium' ? 'PREMIUM SPONSORSHIP' : 'UNCLASSIFIED AD'}</span>
+            <span style="font-weight:700;">$${item.price}</span>
+          </div>
+          <div style="font-size:14px;color:#666;margin-bottom:12px;">Issue #${item.issueNumber} · ${item.dateFormatted}</div>
+          <div style="font-size:12px;text-transform:uppercase;color:#999;margin-bottom:4px;">Ad Copy:</div>
+          <div style="font-size:14px;line-height:1.5;margin-bottom:12px;white-space:pre-wrap;">${escapeHtml(item.adCopy)}</div>
+          <div style="font-size:12px;"><a href="${escapeHtml(item.adUrl)}" style="color:#8fd14f;">${escapeHtml(item.adUrl)}</a></div>
+        </div>
+      `).join('')}
 
-AD BOOKINGS
------------
-${adDetails}
+      <div style="border-top:2px solid #181818;margin-top:20px;padding-top:16px;display:flex;justify-content:space-between;">
+        <span style="font-weight:600;">Total Paid</span>
+        <span style="font-weight:700;font-size:20px;">$${total}</span>
+      </div>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Total Paid: $${total}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      <div style="margin-top:24px;text-align:center;">
+        <a href="https://dashboard.stripe.com/payments/${session.payment_intent}" style="display:inline-block;background:#181818;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;">View in Stripe</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
 
-View in Stripe Dashboard:
-https://dashboard.stripe.com/payments/${session.payment_intent}
-`;
-
-  // Send via Resend
+  // Send internal notification
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -390,7 +402,7 @@ https://dashboard.stripe.com/payments/${session.payment_intent}
       to: env.NOTIFICATION_EMAIL || 'editor@cool-tools.org',
       reply_to: email,
       subject: `New Ad Order: ${items.length} slot${items.length > 1 ? 's' : ''} — $${total}`,
-      text: emailBody,
+      html: internalHtml,
     })
   });
 
@@ -400,20 +412,75 @@ https://dashboard.stripe.com/payments/${session.payment_intent}
     throw new Error(`Failed to send email: ${error}`);
   }
 
-  // Build detailed receipt for customer
-  const customerAdDetails = items.map(item => `
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${item.type === 'premium' ? 'PREMIUM SPONSORSHIP' : 'UNCLASSIFIED AD'}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // HTML for customer confirmation email
+  const customerHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;">
+  <div style="max-width:600px;margin:0 auto;padding:20px;">
 
-Issue: #${item.issueNumber} — ${item.dateFormatted}
-Price: $${item.price}
+    <div style="text-align:center;padding:24px 0;">
+      <div style="width:60px;height:60px;background:#8fd14f;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
+        <span style="font-size:28px;">✓</span>
+      </div>
+      <h1 style="margin:0 0 8px;color:#181818;font-size:28px;">Order Confirmed!</h1>
+      <p style="margin:0;color:#666;">Thanks for advertising with Recomendo</p>
+    </div>
 
-AD COPY:
-${item.adCopy}
+    <div style="background:white;border-radius:8px;padding:24px;margin-bottom:16px;">
+      <div style="text-align:center;padding-bottom:16px;border-bottom:1px dashed #ddd;margin-bottom:16px;">
+        <div style="font-size:12px;text-transform:uppercase;color:#888;letter-spacing:1px;margin-bottom:4px;">Order Receipt</div>
+        <div style="font-size:14px;color:#666;">${orderDate}</div>
+      </div>
 
-URL: ${item.adUrl}
-`).join('\n');
+      <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px dashed #ddd;">
+        <div style="font-size:12px;text-transform:uppercase;color:#888;letter-spacing:1px;margin-bottom:8px;">Billed To</div>
+        <div style="font-weight:600;">${escapeHtml(name)}</div>
+        <div style="color:#666;">${escapeHtml(email)}</div>
+        ${company ? `<div style="color:#666;">${escapeHtml(company)}</div>` : ''}
+      </div>
+
+      <div style="font-size:12px;text-transform:uppercase;color:#888;letter-spacing:1px;margin-bottom:12px;">Your Ad Bookings</div>
+      ${items.map(item => `
+        <div style="background:#f7f9fa;border-radius:8px;padding:16px;margin-bottom:12px;">
+          <div style="margin-bottom:8px;">
+            <span style="font-weight:700;color:${item.type === 'premium' ? '#b8860b' : '#333'};">${item.type === 'premium' ? 'Premium Sponsorship' : 'Unclassified Ad'}</span>
+            <span style="float:right;font-weight:700;">$${item.price}</span>
+          </div>
+          <div style="font-size:14px;color:#666;margin-bottom:12px;">Issue #${item.issueNumber} · ${item.dateFormatted}</div>
+          <div style="font-size:11px;text-transform:uppercase;color:#999;margin-bottom:4px;">Your Ad Copy:</div>
+          <div style="font-size:14px;line-height:1.5;margin-bottom:8px;padding:12px;background:white;border-radius:4px;white-space:pre-wrap;">${escapeHtml(item.adCopy)}</div>
+          <div style="font-size:13px;"><span style="color:#888;">Link:</span> <a href="${escapeHtml(item.adUrl)}" style="color:#8fd14f;">${escapeHtml(item.adUrl)}</a></div>
+        </div>
+      `).join('')}
+
+      <div style="border-top:2px solid #181818;margin-top:8px;padding-top:16px;">
+        <span style="font-weight:600;">Total Paid</span>
+        <span style="float:right;font-weight:700;font-size:20px;color:#8fd14f;">$${total}</span>
+        <span style="float:right;background:#8fd14f;color:#181818;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-right:8px;">PAID</span>
+      </div>
+    </div>
+
+    <div style="background:white;border-radius:8px;padding:24px;margin-bottom:16px;">
+      <div style="font-size:12px;text-transform:uppercase;color:#888;letter-spacing:1px;margin-bottom:12px;">What Happens Next</div>
+      <ul style="margin:0;padding-left:20px;color:#555;line-height:1.8;">
+        <li>We'll review your ad copy to ensure it meets our guidelines.</li>
+        <li>Your ad will be published on the scheduled date.</li>
+        <li>You'll receive performance stats after your ad runs.</li>
+      </ul>
+    </div>
+
+    <div style="text-align:center;padding:16px;color:#888;font-size:13px;">
+      Questions? Just reply to this email.<br>
+      <span style="color:#8fd14f;font-weight:600;">Recomendo</span>
+    </div>
+  </div>
+</body>
+</html>`;
 
   // Send confirmation to customer
   await fetch('https://api.resend.com/emails', {
@@ -427,41 +494,21 @@ URL: ${item.adUrl}
       to: email,
       reply_to: env.NOTIFICATION_EMAIL || 'editor@kk.org',
       subject: `Your Recomendo Ad Booking Confirmation — $${total}`,
-      text: `
-RECOMENDO ADVERTISING
-=====================
-Order Receipt
-
-Hi ${name},
-
-Thanks for booking advertising with Recomendo! Your payment has been received.
-
-ORDER DETAILS
--------------
-${company ? `Company: ${company}\n` : ''}Email: ${email}
-Date: ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-
-YOUR AD BOOKINGS
-----------------
-${customerAdDetails}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TOTAL PAID: $${total}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-WHAT HAPPENS NEXT
------------------
-• We'll review your ad copy to ensure it meets our guidelines.
-• Your ad will be published on the scheduled date.
-• You'll receive performance stats after your ad runs.
-
-If you have any questions, just reply to this email.
-
-Best,
-The Recomendo Team
-`
+      html: customerHtml,
     })
   });
+}
+
+/**
+ * Escape HTML for safe display in emails
+ */
+function escapeHtml(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 /**
