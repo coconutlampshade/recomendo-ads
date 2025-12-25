@@ -396,7 +396,22 @@ https://dashboard.stripe.com/payments/${session.payment_intent}
     throw new Error(`Failed to send email: ${error}`);
   }
 
-  // Also send confirmation to customer
+  // Build detailed receipt for customer
+  const customerAdDetails = items.map(item => `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${item.type === 'premium' ? 'PREMIUM SPONSORSHIP' : 'UNCLASSIFIED AD'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Issue: #${item.issueNumber} — ${item.dateFormatted}
+Price: $${item.price}
+
+AD COPY:
+${item.adCopy}
+
+URL: ${item.adUrl}
+`).join('\n');
+
+  // Send confirmation to customer
   await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -407,17 +422,34 @@ https://dashboard.stripe.com/payments/${session.payment_intent}
       from: 'Recomendo <ads@recommendo.org>',
       to: email,
       reply_to: env.NOTIFICATION_EMAIL || 'editor@kk.org',
-      subject: `Your Recomendo Ad Booking Confirmation`,
+      subject: `Your Recomendo Ad Booking Confirmation — $${total}`,
       text: `
+RECOMENDO ADVERTISING
+=====================
+Order Receipt
+
 Hi ${name},
 
-Thanks for booking advertising with Recomendo! Your payment of $${total} has been received.
+Thanks for booking advertising with Recomendo! Your payment has been received.
 
-YOUR ORDER
-----------
-${items.map(item => `• ${item.type === 'premium' ? 'Premium Sponsorship' : 'Unclassified Ad'} — Issue #${item.issueNumber} (${item.dateFormatted})`).join('\n')}
+ORDER DETAILS
+-------------
+${company ? `Company: ${company}\n` : ''}Email: ${email}
+Date: ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
 
-Your ad${items.length > 1 ? 's' : ''} will be published on the scheduled date${items.length > 1 ? 's' : ''}.
+YOUR AD BOOKINGS
+----------------
+${customerAdDetails}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TOTAL PAID: $${total}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT HAPPENS NEXT
+-----------------
+• We'll review your ad copy to ensure it meets our guidelines.
+• Your ad will be published on the scheduled date.
+• You'll receive performance stats after your ad runs.
 
 If you have any questions, just reply to this email.
 
