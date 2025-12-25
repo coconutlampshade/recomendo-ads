@@ -121,6 +121,25 @@
     .loading { text-align: center; padding: 40px; color: #666; }
     .no-orders { text-align: center; padding: 40px; color: #666; }
 
+    .delete-btn {
+      background: none;
+      border: 1px solid #ddd;
+      color: #999;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .delete-btn:hover {
+      background: #fee;
+      border-color: #e74c3c;
+      color: #e74c3c;
+    }
+    .delete-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     .logout-btn {
       background: none;
       border: 1px solid #ddd;
@@ -250,6 +269,7 @@
             <th>Customer</th>
             <th>Ad Copy</th>
             <th>Amount</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>`;
@@ -258,7 +278,7 @@
         const badgeClass = order.type === 'premium' ? 'premium' : 'unclassified';
         const typeName = order.type === 'premium' ? 'Premium' : 'Unclassified';
 
-        html += `<tr>
+        html += `<tr id="row-${order.adId}">
           <td class="issue-date">
             <strong>#${order.issueNumber}</strong><br>
             ${order.dateFormatted}
@@ -273,6 +293,7 @@
             <a href="${escapeHtml(order.adUrl)}" target="_blank" class="ad-url">${escapeHtml(order.adUrl)}</a>
           </td>
           <td><strong>$${order.price}</strong></td>
+          <td><button class="delete-btn" onclick="deleteAd('${order.adId}')">Delete</button></td>
         </tr>`;
       }
 
@@ -285,6 +306,62 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+
+    async function deleteAd(adId) {
+      if (!confirm('Delete this ad from the schedule? This cannot be undone.')) {
+        return;
+      }
+
+      const password = sessionStorage.getItem('adminPass');
+      if (!password) {
+        alert('Please log in again');
+        logout();
+        return;
+      }
+
+      // Disable the button
+      const btn = document.querySelector(`#row-${adId} .delete-btn`);
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Deleting...';
+      }
+
+      try {
+        const response = await fetch(`${WORKER_URL}/admin/delete`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${password}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ adId })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete');
+        }
+
+        // Remove the row from the table
+        const row = document.getElementById(`row-${adId}`);
+        if (row) {
+          row.style.opacity = '0.5';
+          row.style.textDecoration = 'line-through';
+          setTimeout(() => row.remove(), 500);
+        }
+
+        // Update the upcoming ads count
+        const countEl = document.getElementById('upcomingAds');
+        const currentCount = parseInt(countEl.textContent) || 0;
+        countEl.textContent = Math.max(0, currentCount - 1);
+
+      } catch (err) {
+        alert('Failed to delete ad');
+        console.error(err);
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Delete';
+        }
+      }
     }
 
     // Check for saved session

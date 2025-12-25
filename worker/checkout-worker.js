@@ -69,6 +69,10 @@ export default {
       return handleInventory(request, env);
     }
 
+    if (url.pathname === '/admin/delete' && request.method === 'POST') {
+      return handleDeleteAd(request, env);
+    }
+
     return new Response('Not Found', { status: 404 });
   }
 };
@@ -499,6 +503,9 @@ async function handleAdminOrders(request, env) {
     const orders = [];
     let totalRevenue = 0;
 
+    // Get cancelled ads list
+    const cancelledAds = await getCancelledAds(env);
+
     for (const session of data.data) {
       if (session.payment_status !== 'paid') continue;
 
@@ -523,8 +530,16 @@ async function handleAdminOrders(request, env) {
         }
       }
 
-      for (const item of items) {
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        // Create unique ID for this ad
+        const adId = `${session.id}_${i}_${item.dateStr || item.issueNumber}`;
+
+        // Skip cancelled ads
+        if (cancelledAds.includes(adId)) continue;
+
         orders.push({
+          adId,
           sessionId: session.id,
           customerName: meta.customer_name || 'Unknown',
           customerEmail: meta.customer_email || session.customer_email || '',
@@ -532,7 +547,7 @@ async function handleAdminOrders(request, env) {
           type: item.type || 'unclassified',
           issueNumber: item.issueNumber || '?',
           dateFormatted: item.dateFormatted || '',
-          issueDate: item.date || '',
+          issueDate: item.dateStr || item.date || '',
           adCopy: item.adCopy || '',
           adUrl: item.adUrl || '',
           price: item.price || 0,
@@ -600,6 +615,9 @@ async function handleInventory(request, env) {
     const data = await response.json();
     const inventory = {};
 
+    // Get cancelled ads list
+    const cancelledAds = await getCancelledAds(env);
+
     for (const session of data.data) {
       if (session.payment_status !== 'paid') continue;
 
@@ -613,7 +631,14 @@ async function handleInventory(request, env) {
         continue;
       }
 
-      for (const item of items) {
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        // Create unique ID for this ad (same as in handleAdminOrders)
+        const adId = `${session.id}_${i}_${item.dateStr || item.issueNumber}`;
+
+        // Skip cancelled ads
+        if (cancelledAds.includes(adId)) continue;
+
         // Check for dateStr (from cart) or date field
         const dateStr = item.dateStr || item.date;
         if (!dateStr) continue;
@@ -639,4 +664,69 @@ async function handleInventory(request, env) {
       headers: corsHeaders()
     });
   }
+}
+
+/**
+ * Delete/cancel an ad from the schedule
+ */
+async function handleDeleteAd(request, env) {
+  // Handle CORS preflight
+  if (request.method === 'OPTIONS') {
+    return handleCors();
+  }
+
+  // Check authorization
+  const authHeader = request.headers.get('Authorization');
+  const password = authHeader?.replace('Bearer ', '');
+
+  if (!password || password !== env.ADMIN_PASSWORD) {
+    return new Response('Unauthorized', {
+      status: 401,
+      headers: corsHeaders()
+    });
+  }
+
+  try {
+    const { adId } = await request.json();
+
+    if (!adId) {
+      return new Response(JSON.stringify({ error: 'Missing adId' }), {
+        status: 400,
+        headers: corsHeaders()
+      });
+    }
+
+    // Store cancelled ad ID in KV
+    if (env.ORDERS_KV) {
+      // Get existing cancelled list
+      const cancelledJson = await env.ORDERS_KV.get('cancelled_ads');
+      const cancelled = cancelledJson ? JSON.parse(cancelledJson) : [];
+
+      // Add new ID if not already there
+      if (!cancelled.includes(adId)) {
+        cancelled.push(adId);
+        await env.ORDERS_KV.put('cancelled_ads', JSON.stringify(cancelled));
+      }
+    }
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: corsHeaders()
+    });
+
+  } catch (error) {
+    console.error('Delete error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to delete ad' }), {
+      status: 500,
+      headers: corsHeaders()
+    });
+  }
+}
+
+/**
+ * Get list of cancelled ad IDs
+ */
+async function getCancelledAds(env) {
+  if (!env.ORDERS_KV) return [];
+  const cancelledJson = await env.ORDERS_KV.get('cancelled_ads');
+  return cancelledJson ? JSON.parse(cancelledJson) : [];
 }
