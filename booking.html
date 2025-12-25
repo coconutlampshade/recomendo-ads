@@ -622,7 +622,7 @@
       workerUrl: 'https://recomendo-ads-checkout.markfrauenfelder.workers.dev'
     };
 
-    // Sold-out slots by issue date - populated from server
+    // Sold-out slots by issue number - populated from server
     let SOLD_OUT = {};
 
     // ============================================
@@ -631,6 +631,14 @@
 
     // State
     let cart = [];
+
+    // Format date as YYYY-MM-DD in local timezone (not UTC)
+    function toLocalDateStr(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
 
     // Generate issue dates (Sundays)
     function generateIssueDates(count) {
@@ -648,7 +656,7 @@
         issueDate.setDate(nextSunday.getDate() + (i * 7));
         issues.push({
           date: issueDate,
-          dateStr: issueDate.toISOString().split('T')[0],
+          dateStr: toLocalDateStr(issueDate),
           issueNumber: CONFIG.startingIssueNumber + i
         });
       }
@@ -662,9 +670,9 @@
       return date.toLocaleDateString('en-US', options);
     }
 
-    // Get availability for an issue
-    function getAvailability(dateStr) {
-      const soldOut = SOLD_OUT[dateStr] || {};
+    // Get availability for an issue (by issue number)
+    function getAvailability(issueNumber) {
+      const soldOut = SOLD_OUT[String(issueNumber)] || {};
       return {
         premiumAvailable: !soldOut.premium,
         unclassifiedRemaining: CONFIG.slotsPerIssue.unclassified - (soldOut.unclassified || 0)
@@ -723,7 +731,7 @@
       let firstAvailableId = null;
 
       container.innerHTML = issues.map(issue => {
-        const avail = getAvailability(issue.dateStr);
+        const avail = getAvailability(issue.issueNumber);
         const dateFormatted = formatDate(issue.date);
 
         // Track first available

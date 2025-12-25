@@ -635,8 +635,8 @@ async function handleAdminOrders(request, env) {
 }
 
 /**
- * Public endpoint to get sold inventory per issue date
- * Returns: { "2025-01-05": { premium: true, unclassified: 3 }, ... }
+ * Public endpoint to get sold inventory per issue number
+ * Returns: { "542": { premium: true, unclassified: 3 }, ... }
  */
 async function handleInventory(request, env) {
   // Handle CORS preflight
@@ -686,17 +686,18 @@ async function handleInventory(request, env) {
         // Skip cancelled ads
         if (cancelledAds.includes(adId)) continue;
 
-        // Check for dateStr (from cart) or date field
-        const dateStr = item.dateStr || item.date;
-        if (!dateStr) continue;
-        if (!inventory[dateStr]) {
-          inventory[dateStr] = { premium: false, unclassified: 0 };
+        // Use issue number as key (more reliable than date which has timezone issues)
+        const issueNum = String(item.issueNumber);
+        if (!issueNum || issueNum === 'undefined') continue;
+
+        if (!inventory[issueNum]) {
+          inventory[issueNum] = { premium: false, unclassified: 0 };
         }
 
         if (item.type === 'premium') {
-          inventory[dateStr].premium = true;
+          inventory[issueNum].premium = true;
         } else if (item.type === 'unclassified') {
-          inventory[dateStr].unclassified++;
+          inventory[issueNum].unclassified++;
         }
       }
     }
