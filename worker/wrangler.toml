@@ -1,0 +1,21 @@
+# Cloudflare Worker configuration for Recomendo Ads Checkout
+# See: https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "recomendo-ads-checkout"
+main = "checkout-worker.js"
+compatibility_date = "2024-01-01"
+
+# Optional: KV namespace for storing order data between checkout and webhook
+# Uncomment and create a KV namespace in Cloudflare dashboard if needed
+# [[kv_namespaces]]
+# binding = "ORDERS_KV"
+# id = "your-kv-namespace-id"
+
+# Environment variables (set these in Cloudflare dashboard for security)
+# [vars]
+# NOTIFICATION_EMAIL = "editor@cool-tools.org"
+
+# Secrets (set via `wrangler secret put` command):
+# - STRIPE_SECRET_KEY
+# - STRIPE_WEBHOOK_SECRET
+# - RESEND_API_KEY

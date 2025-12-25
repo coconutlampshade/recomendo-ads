@@ -616,16 +616,14 @@
       slotsPerIssue: {
         premium: 1,
         unclassified: 10
-      }
+      },
+
+      // Worker URL for inventory
+      workerUrl: 'https://recomendo-ads-checkout.markfrauenfelder.workers.dev'
     };
 
-    // Define sold-out slots by issue date (YYYY-MM-DD format)
-    // Edit this object to mark slots as sold
-    const SOLD_OUT = {
-      // Example:
-      // '2025-01-05': { premium: true, unclassified: 3 }, // premium sold, 3 unclassifieds sold
-      // '2025-01-12': { premium: true, unclassified: 10 }, // fully sold out
-    };
+    // Sold-out slots by issue date - populated from server
+    let SOLD_OUT = {};
 
     // ============================================
     // APPLICATION CODE
@@ -881,9 +879,26 @@
       }
     });
 
+    // Fetch inventory from server
+    async function fetchInventory() {
+      try {
+        const response = await fetch(`${CONFIG.workerUrl}/inventory`);
+        if (response.ok) {
+          SOLD_OUT = await response.json();
+        }
+      } catch (err) {
+        console.error('Failed to fetch inventory:', err);
+      }
+    }
+
     // Initialize
-    loadCart();
-    updateUI();
+    async function init() {
+      loadCart();
+      await fetchInventory();
+      updateUI();
+    }
+
+    init();
   </script>
 
 </body>
