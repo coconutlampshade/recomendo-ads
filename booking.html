@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Advertising — Recomendo</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --yellow: #ffe600;
+      --yellow-dark: #e6c200;
+      --green: #8fd14f;
+      --green-dark: #7ac043;
+      --black: #181818;
+      --white: #fff;
+      --gray: #f7f9fa;
+      --gray-dark: #e8ecee;
+      --border: #e0e6d9;
+      --red: #e74c3c;
+    }
+
+    html { box-sizing: border-box; }
+    *, *:before, *:after { box-sizing: inherit; }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: var(--gray);
+      color: var(--black);
+      margin: 0;
+      padding: 0;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    /* Header */
+    header {
+      background: var(--white);
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--black);
+    }
+
+    .logo {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: 2px solid var(--green);
+    }
+
+    .logo-text {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .header-nav a {
+      color: #555;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+
+    .header-nav a:hover {
+      color: var(--black);
+    }
+
+    .cart-indicator {
+      background: var(--green);
+      color: var(--black);
+      font-weight: 700;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .cart-indicator:hover {
+      background: var(--yellow);
+    }
+
+    .cart-indicator.empty {
+      background: var(--gray-dark);
+      color: #666;
+    }
+
+    /* Main Layout */
+    .page-layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .page-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Page Title */
+    .page-title {
+      margin-bottom: 1.5rem;
+    }
+
+    .page-title h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .page-title p {
+      color: #666;
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .jump-link {
+      display: inline-block;
+      margin-top: 0.75rem;
+      color: var(--black);
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .jump-link:hover {
+      color: var(--green-dark);
+    }
+
+    .jump-link:before {
+      content: '↓ ';
+    }
+
+    /* Issue Cards */
+    .issue-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .issue-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .issue-date {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .issue-number {
+      color: #999;
+      font-size: 0.85rem;
+    }
+
+    /* Slots */
+    .slot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--gray-dark);
+      gap: 1rem;
+    }
+
+    .slot:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .slot-info {
+      flex: 1;
+    }
+
+    .slot-type {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.15rem;
+    }
+
+    .slot-type.premium {
+      color: var(--black);
+    }
+
+    .slot-type.unclassified {
+      color: #555;
+    }
+
+    .slot-remaining {
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    .slot-action {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .slot-price {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      background: var(--yellow);
+      padding: 0.2em 0.5em;
+      border-radius: 0.3em;
+    }
+
+    .slot-btn {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .slot-btn.add {
+      background: var(--green);
+      color: var(--black);
+    }
+
+    .slot-btn.add:hover {
+      background: var(--green-dark);
+    }
+
+    .slot-btn.in-cart {
+      background: var(--black);
+      color: var(--white);
+    }
+
+    .slot-btn.in-cart:hover {
+      background: #333;
+    }
+
+    .slot-btn.sold-out {
+      background: var(--gray-dark);
+      color: #999;
+      cursor: not-allowed;
+    }
+
+    .slot-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Sticky Cart Sidebar */
+    .cart-sidebar {
+      position: sticky;
+      top: 100px;
+    }
+
+    @media (max-width: 900px) {
+      .cart-sidebar {
+        display: none;
+      }
+    }
+
+    .cart-box {
+      background: var(--white);
+      border: 2px solid var(--green);
+      border-radius: 1rem;
+      padding: 1.5rem;
+    }
+
+    .cart-box h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 0 0 1rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .cart-count {
+      background: var(--green);
+      color: var(--black);
+      font-size: 0.8rem;
+      padding: 0.15em 0.5em;
+      border-radius: 1em;
+    }
+
+    .cart-empty {
+      color: #888;
+      font-size: 0.95rem;
+      padding: 1rem 0;
+    }
+
+    .cart-items {
+      margin-bottom: 1rem;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--gray-dark);
+      gap: 0.5rem;
+    }
+
+    .cart-item:last-child {
+      border-bottom: none;
+    }
+
+    .cart-item-info {
+      flex: 1;
+    }
+
+    .cart-item-type {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .cart-item-date {
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    .cart-item-price {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .cart-item-remove {
+      background: none;
+      border: none;
+      color: #999;
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .cart-item-remove:hover {
+      color: var(--red);
+    }
+
+    .cart-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 2px solid var(--black);
+      margin-top: 0.5rem;
+    }
+
+    .cart-total-label {
+      font-weight: 600;
+    }
+
+    .cart-total-amount {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+
+    .checkout-btn {
+      display: block;
+      width: 100%;
+      background: var(--green);
+      color: var(--black);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 1rem;
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: background 0.15s;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .checkout-btn:hover {
+      background: var(--yellow);
+    }
+
+    /* Mobile Cart Modal */
+    .cart-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+    }
+
+    .cart-modal-overlay.open {
+      display: block;
+    }
+
+    .cart-modal {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border-radius: 1.5rem 1.5rem 0 0;
+      padding: 1.5rem;
+      max-height: 80vh;
+      overflow-y: auto;
+      z-index: 201;
+    }
+
+    .cart-modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #666;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .legend-dot.available {
+      background: var(--green);
+    }
+
+    .legend-dot.limited {
+      background: var(--yellow);
+    }
+
+    .legend-dot.sold-out {
+      background: var(--gray-dark);
+    }
+
+    /* Footer */
+    footer {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: #666;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--green);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <a href="advertise.html" class="logo-link">
+        <img src="reco-logo.jpg" alt="Recomendo" class="logo">
+        <span class="logo-text">Recomendo</span>
+      </a>
+      <nav class="header-nav">
+        <a href="advertise.html">Ad Info</a>
+        <div class="cart-indicator empty" id="headerCartBtn">
+          Cart (0)
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="page-layout">
+    <!-- Calendar Column -->
+    <main>
+      <div class="page-title">
+        <h1>Book Your Ad Slot</h1>
+        <p>Select an available slot below. Premium Sponsorships are $500, Unclassifieds are $200.</p>
+        <a href="#" class="jump-link" id="jumpToAvailable">Jump to next available</a>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item">
+          <span class="legend-dot available"></span>
+          <span>Available</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot limited"></span>
+          <span>Limited spots</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot sold-out"></span>
+          <span>Sold out</span>
+        </div>
+      </div>
+
+      <div id="issueList">
+        <!-- Issues will be rendered here by JavaScript -->
+      </div>
+    </main>
+
+    <!-- Cart Sidebar (Desktop) -->
+    <aside class="cart-sidebar">
+      <div class="cart-box">
+        <h2>Your Cart <span class="cart-count" id="cartCount">0</span></h2>
+        <div id="cartContent">
+          <p class="cart-empty">Your cart is empty. Select a slot to get started.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Mobile Cart Modal -->
+  <div class="cart-modal-overlay" id="cartModalOverlay">
+    <div class="cart-modal">
+      <button class="cart-modal-close" id="cartModalClose">&times;</button>
+      <h2>Your Cart <span class="cart-count" id="cartCountMobile">0</span></h2>
+      <div id="cartContentMobile">
+        <p class="cart-empty">Your cart is empty.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Questions? Email <a href="mailto:[AD_SALES_EMAIL]">[AD_SALES_EMAIL]</a> · <a href="advertise.html">Back to Ad Info</a></p>
+  </footer>
+
+  <script>
+    // ============================================
+    // CONFIGURATION - Edit this section to update availability
+    // ============================================
+
+    const CONFIG = {
+      // Starting issue number
+      startingIssueNumber: 542,
+
+      // Number of weeks to show
+      weeksToShow: 20,
+
+      // Prices
+      prices: {
+        premium: 500,
+        unclassified: 200
+      },
+
+      // Checkout URL (Stripe, Typeform, etc.)
+      checkoutUrl: 'checkout.html',
+
+      // Slots per issue
+      slotsPerIssue: {
+        premium: 1,
+        unclassified: 10
+      }
+    };
+
+    // Define sold-out slots by issue date (YYYY-MM-DD format)
+    // Edit this object to mark slots as sold
+    const SOLD_OUT = {
+      // Example:
+      // '2025-01-05': { premium: true, unclassified: 3 }, // premium sold, 3 unclassifieds sold
+      // '2025-01-12': { premium: true, unclassified: 10 }, // fully sold out
+    };
+
+    // ============================================
+    // APPLICATION CODE
+    // ============================================
+
+    // State
+    let cart = [];
+
+    // Generate issue dates (Sundays)
+    function generateIssueDates(count) {
+      const issues = [];
+      const today = new Date();
+
+      // Find next Sunday
+      let nextSunday = new Date(today);
+      const dayOfWeek = today.getDay();
+      const daysUntilSunday = dayOfWeek === 0 ? 7 : 7 - dayOfWeek;
+      nextSunday.setDate(today.getDate() + daysUntilSunday);
+
+      for (let i = 0; i < count; i++) {
+        const issueDate = new Date(nextSunday);
+        issueDate.setDate(nextSunday.getDate() + (i * 7));
+        issues.push({
+          date: issueDate,
+          dateStr: issueDate.toISOString().split('T')[0],
+          issueNumber: CONFIG.startingIssueNumber + i
+        });
+      }
+
+      return issues;
+    }
+
+    // Format date for display
+    function formatDate(date) {
+      const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+      return date.toLocaleDateString('en-US', options);
+    }
+
+    // Get availability for an issue
+    function getAvailability(dateStr) {
+      const soldOut = SOLD_OUT[dateStr] || {};
+      return {
+        premiumAvailable: !soldOut.premium,
+        unclassifiedRemaining: CONFIG.slotsPerIssue.unclassified - (soldOut.unclassified || 0)
+      };
+    }
+
+    // Check if item is in cart
+    function isInCart(dateStr, type) {
+      return cart.some(item => item.dateStr === dateStr && item.type === type);
+    }
+
+    // Count items in cart for a specific slot
+    function getCartCount(dateStr, type) {
+      return cart.filter(item => item.dateStr === dateStr && item.type === type).length;
+    }
+
+    // Add to cart
+    function addToCart(dateStr, type, issueNumber, dateFormatted) {
+      const price = type === 'premium' ? CONFIG.prices.premium : CONFIG.prices.unclassified;
+      cart.push({
+        id: `${dateStr}-${type}-${Date.now()}`,
+        dateStr,
+        type,
+        issueNumber,
+        dateFormatted,
+        price
+      });
+      updateUI();
+      saveCart();
+    }
+
+    // Remove from cart
+    function removeFromCart(itemId) {
+      cart = cart.filter(item => item.id !== itemId);
+      updateUI();
+      saveCart();
+    }
+
+    // Save cart to localStorage
+    function saveCart() {
+      localStorage.setItem('recomendo_cart', JSON.stringify(cart));
+    }
+
+    // Load cart from localStorage
+    function loadCart() {
+      const saved = localStorage.getItem('recomendo_cart');
+      if (saved) {
+        cart = JSON.parse(saved);
+      }
+    }
+
+    // Render issue list
+    function renderIssues() {
+      const issues = generateIssueDates(CONFIG.weeksToShow);
+      const container = document.getElementById('issueList');
+      let firstAvailableId = null;
+
+      container.innerHTML = issues.map(issue => {
+        const avail = getAvailability(issue.dateStr);
+        const dateFormatted = formatDate(issue.date);
+
+        // Track first available
+        if (!firstAvailableId && (avail.premiumAvailable || avail.unclassifiedRemaining > 0)) {
+          firstAvailableId = `issue-${issue.dateStr}`;
+        }
+
+        // Premium slot
+        const premiumInCart = isInCart(issue.dateStr, 'premium');
+        let premiumBtn = '';
+        if (!avail.premiumAvailable) {
+          premiumBtn = `<button class="slot-btn sold-out" disabled>Sold Out</button>`;
+        } else if (premiumInCart) {
+          premiumBtn = `<button class="slot-btn in-cart" disabled>In Cart</button>`;
+        } else {
+          premiumBtn = `<button class="slot-btn add" onclick="addToCart('${issue.dateStr}', 'premium', ${issue.issueNumber}, '${dateFormatted}')">Add to Cart</button>`;
+        }
+
+        // Unclassified slots
+        const unclassifiedInCart = getCartCount(issue.dateStr, 'unclassified');
+        const unclassifiedAvailable = avail.unclassifiedRemaining - unclassifiedInCart;
+        let unclassifiedBtn = '';
+        let unclassifiedRemaining = '';
+
+        if (avail.unclassifiedRemaining === 0) {
+          unclassifiedBtn = `<button class="slot-btn sold-out" disabled>Sold Out</button>`;
+        } else if (unclassifiedAvailable <= 0) {
+          unclassifiedBtn = `<button class="slot-btn in-cart" disabled>In Cart (${unclassifiedInCart})</button>`;
+          unclassifiedRemaining = `<div class="slot-remaining">${avail.unclassifiedRemaining} spots total</div>`;
+        } else {
+          unclassifiedBtn = `<button class="slot-btn add" onclick="addToCart('${issue.dateStr}', 'unclassified', ${issue.issueNumber}, '${dateFormatted}')">Add to Cart</button>`;
+          if (unclassifiedInCart > 0) {
+            unclassifiedRemaining = `<div class="slot-remaining">${unclassifiedAvailable} of ${avail.unclassifiedRemaining} remaining</div>`;
+          } else {
+            unclassifiedRemaining = `<div class="slot-remaining">${unclassifiedAvailable} spots available</div>`;
+          }
+        }
+
+        return `
+          <div class="issue-card" id="issue-${issue.dateStr}">
+            <div class="issue-header">
+              <span class="issue-date">${dateFormatted}</span>
+              <span class="issue-number">Issue #${issue.issueNumber}</span>
+            </div>
+
+            <div class="slot">
+              <div class="slot-info">
+                <div class="slot-type premium">Premium Sponsorship</div>
+              </div>
+              <div class="slot-action">
+                <span class="slot-price">$${CONFIG.prices.premium}</span>
+                ${premiumBtn}
+              </div>
+            </div>
+
+            <div class="slot">
+              <div class="slot-info">
+                <div class="slot-type unclassified">Unclassified Ad</div>
+                ${unclassifiedRemaining}
+              </div>
+              <div class="slot-action">
+                <span class="slot-price">$${CONFIG.prices.unclassified}</span>
+                ${unclassifiedBtn}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Update jump link
+      const jumpLink = document.getElementById('jumpToAvailable');
+      if (firstAvailableId) {
+        jumpLink.href = `#${firstAvailableId}`;
+        jumpLink.style.display = 'inline-block';
+      } else {
+        jumpLink.style.display = 'none';
+      }
+    }
+
+    // Render cart
+    function renderCart() {
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+      let html = '';
+      if (cart.length === 0) {
+        html = `<p class="cart-empty">Your cart is empty. Select a slot to get started.</p>`;
+      } else {
+        html = `
+          <div class="cart-items">
+            ${cart.map(item => `
+              <div class="cart-item">
+                <div class="cart-item-info">
+                  <div class="cart-item-type">${item.type === 'premium' ? 'Premium Sponsorship' : 'Unclassified Ad'}</div>
+                  <div class="cart-item-date">Issue #${item.issueNumber} · ${item.dateFormatted}</div>
+                </div>
+                <div class="cart-item-price">$${item.price}</div>
+                <button class="cart-item-remove" onclick="removeFromCart('${item.id}')" title="Remove">&times;</button>
+              </div>
+            `).join('')}
+          </div>
+          <div class="cart-total">
+            <span class="cart-total-label">Total</span>
+            <span class="cart-total-amount">$${total}</span>
+          </div>
+          <a href="${CONFIG.checkoutUrl}" class="checkout-btn">Proceed to Checkout</a>
+        `;
+      }
+
+      // Update both desktop and mobile carts
+      document.getElementById('cartContent').innerHTML = html;
+      document.getElementById('cartContentMobile').innerHTML = html;
+
+      // Update counts
+      document.getElementById('cartCount').textContent = cart.length;
+      document.getElementById('cartCountMobile').textContent = cart.length;
+
+      // Update header cart indicator
+      const headerCart = document.getElementById('headerCartBtn');
+      headerCart.textContent = `Cart (${cart.length})`;
+      headerCart.classList.toggle('empty', cart.length === 0);
+    }
+
+    // Update all UI
+    function updateUI() {
+      renderIssues();
+      renderCart();
+    }
+
+    // Mobile cart modal handlers
+    document.getElementById('headerCartBtn').addEventListener('click', function() {
+      if (window.innerWidth <= 900) {
+        document.getElementById('cartModalOverlay').classList.add('open');
+      }
+    });
+
+    document.getElementById('cartModalOverlay').addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.classList.remove('open');
+      }
+    });
+
+    document.getElementById('cartModalClose').addEventListener('click', function() {
+      document.getElementById('cartModalOverlay').classList.remove('open');
+    });
+
+    // Smooth scroll for jump link
+    document.getElementById('jumpToAvailable').addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('href').substring(1);
+      const target = document.getElementById(targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+
+    // Initialize
+    loadCart();
+    updateUI();
+  </script>
+
+</body>
+</html>

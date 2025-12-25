@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmed — Recomendo Advertising</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --yellow: #ffe600;
+      --green: #8fd14f;
+      --black: #181818;
+      --white: #fff;
+      --gray: #f7f9fa;
+      --border: #e0e6d9;
+    }
+
+    html { box-sizing: border-box; }
+    *, *:before, *:after { box-sizing: inherit; }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: var(--gray);
+      color: var(--black);
+      margin: 0;
+      padding: 0;
+      font-size: 1rem;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 550px;
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid var(--green);
+      margin-bottom: 2rem;
+    }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem auto;
+    }
+
+    .success-icon svg {
+      width: 40px;
+      height: 40px;
+      fill: var(--white);
+    }
+
+    h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0 0 1rem 0;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: #555;
+      margin-bottom: 2rem;
+    }
+
+    .confirmation-box {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    .confirmation-box h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin: 0 0 1rem 0;
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--gray);
+    }
+
+    .order-item:last-child {
+      border-bottom: none;
+    }
+
+    .order-item-type {
+      font-weight: 600;
+    }
+
+    .order-item-date {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .order-item-price {
+      font-weight: 700;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 1rem;
+      margin-top: 0.5rem;
+      border-top: 2px solid var(--black);
+      font-weight: 700;
+    }
+
+    .total-amount {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.25rem;
+    }
+
+    .next-steps {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    .next-steps h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin: 0 0 1rem 0;
+    }
+
+    .next-steps ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: #555;
+    }
+
+    .next-steps li {
+      margin-bottom: 0.5rem;
+    }
+
+    .btn {
+      display: inline-block;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 2rem;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: var(--black);
+    }
+
+    .btn-primary:hover {
+      background: var(--yellow);
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--black);
+      border: 1.5px solid var(--border);
+      margin-left: 0.5rem;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--black);
+    }
+
+    .help-text {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #888;
+    }
+
+    .help-text a {
+      color: var(--black);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <img src="reco-logo.jpg" alt="Recomendo" class="logo">
+
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+      </svg>
+    </div>
+
+    <h1>Order Confirmed!</h1>
+    <p class="subtitle">Thanks for advertising with Recomendo. We've sent a confirmation to your email.</p>
+
+    <div class="confirmation-box" id="orderDetails">
+      <h2>Your Order</h2>
+      <div id="orderItems">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+
+    <div class="next-steps">
+      <h2>What Happens Next</h2>
+      <ul>
+        <li>We'll review your ad copy to ensure it meets our guidelines.</li>
+        <li>Your ad will be published on the scheduled date.</li>
+        <li>You'll receive performance stats after your ad runs.</li>
+      </ul>
+    </div>
+
+    <div>
+      <a href="advertise.html" class="btn btn-primary">Back to Ad Info</a>
+      <a href="booking.html" class="btn btn-secondary">Book More Slots</a>
+    </div>
+
+    <p class="help-text">
+      Questions? Email <a href="mailto:editor@cool-tools.org">editor@cool-tools.org</a>
+    </p>
+  </div>
+
+  <script>
+    // Try to show order details from localStorage
+    function init() {
+      const pendingOrder = localStorage.getItem('recomendo_pending_order');
+
+      if (pendingOrder) {
+        try {
+          const order = JSON.parse(pendingOrder);
+          renderOrderDetails(order);
+        } catch (e) {
+          console.error('Failed to parse order:', e);
+        }
+
+        // Clear cart and pending order
+        localStorage.removeItem('recomendo_cart');
+        localStorage.removeItem('recomendo_pending_order');
+        localStorage.removeItem('recomendo_hold_start');
+      } else {
+        // No order data available, show generic message
+        document.getElementById('orderDetails').style.display = 'none';
+      }
+    }
+
+    function renderOrderDetails(order) {
+      const container = document.getElementById('orderItems');
+      const total = order.items.reduce((sum, item) => sum + item.price, 0);
+
+      container.innerHTML = `
+        ${order.items.map(item => `
+          <div class="order-item">
+            <div>
+              <div class="order-item-type">${item.type === 'premium' ? 'Premium Sponsorship' : 'Unclassified Ad'}</div>
+              <div class="order-item-date">Issue #${item.issueNumber} · ${item.dateFormatted}</div>
+            </div>
+            <div class="order-item-price">$${item.price}</div>
+          </div>
+        `).join('')}
+        <div class="total-row">
+          <span>Total Paid</span>
+          <span class="total-amount">$${total}</span>
+        </div>
+      `;
+    }
+
+    init();
+  </script>
+
+</body>
+</html>

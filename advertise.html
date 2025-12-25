@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advertise with Recomendo</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --yellow: #ffe600;
+      --yellow-dark: #e6c200;
+      --green: #8fd14f;
+      --black: #181818;
+      --white: #fff;
+      --gray: #f7f9fa;
+      --border: #e0e6d9;
+      --review-bg: #f9fafb;
+      --review-border: #e3e8ee;
+    }
+
+    html { box-sizing: border-box; }
+    *, *:before, *:after { box-sizing: inherit; }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: var(--gray);
+      color: var(--black);
+      margin: 0;
+      padding: 0;
+      font-size: 1.08rem;
+      line-height: 1.7;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Header / Hero */
+    header {
+      padding: 3.5rem 0 2rem 0;
+      text-align: center;
+      background: var(--white);
+    }
+
+    .logo {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      border-radius: 50%;
+      border: 3px solid var(--green);
+      margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin: 0 0 0.75rem 0;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      color: #555;
+      margin-bottom: 0;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Pricing Cards - Hero Area */
+    .pricing-cards {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      align-items: stretch;
+      margin: 2.5rem auto 0 auto;
+      max-width: 700px;
+      flex-wrap: wrap;
+      padding: 0 1rem;
+    }
+
+    .pricing-card {
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: 1.25rem;
+      flex: 1 1 300px;
+      max-width: 340px;
+      padding: 2rem 1.75rem 1.75rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      box-shadow: 0 4px 20px 0 rgba(143,209,79,0.08);
+    }
+
+    .pricing-card.featured {
+      border-color: var(--green);
+    }
+
+    .pricing-card h2 {
+      font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      color: var(--black);
+    }
+
+    .pricing-card .slots {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 1rem;
+    }
+
+    .price-tag {
+      font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--black);
+      background: var(--yellow);
+      display: inline-block;
+      padding: 0.15em 0.5em;
+      border-radius: 0.4em;
+      margin: 0 0 1.25rem 0;
+      letter-spacing: -1px;
+    }
+
+    .pricing-card ul {
+      margin: 0 0 1.5rem 0;
+      padding: 0;
+      list-style: none;
+      font-size: 0.98rem;
+      color: #444;
+      flex-grow: 1;
+    }
+
+    .pricing-card li {
+      margin-bottom: 0.5rem;
+      padding-left: 1.4rem;
+      position: relative;
+    }
+
+    .pricing-card li:before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.5rem;
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+    }
+
+    .cta-button {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: var(--green);
+      color: var(--black);
+      font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: none;
+      border-radius: 2rem;
+      padding: 1rem 1.5rem;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: background 0.18s, box-shadow 0.18s;
+      box-shadow: 0 2px 8px 0 rgba(143,209,79,0.15);
+      margin-top: auto;
+    }
+
+    .cta-button:hover {
+      background: var(--yellow);
+      box-shadow: 0 4px 16px 0 rgba(255,230,0,0.2);
+      color: var(--black);
+    }
+
+    .cta-button.secondary {
+      background: var(--black);
+      color: var(--white);
+    }
+
+    .cta-button.secondary:hover {
+      background: #333;
+    }
+
+    /* Sections */
+    section {
+      padding: 3rem 0;
+    }
+
+    section:nth-child(odd) {
+      background: var(--white);
+    }
+
+    h2 {
+      font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 0 0 1rem 0;
+      color: var(--black);
+      letter-spacing: -0.3px;
+    }
+
+    h3 {
+      font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 0 0 0.75rem 0;
+      color: var(--black);
+    }
+
+    .section-intro {
+      font-size: 1.02rem;
+      color: #555;
+      margin-bottom: 1.5rem;
+      max-width: 600px;
+    }
+
+    /* Stats Row */
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin: 2rem 0 0 0;
+    }
+
+    .stat {
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .stat-number {
+      font-family: 'Montserrat', 'Inter', Arial, sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--black);
+      background: var(--yellow);
+      display: inline-block;
+      padding: 0.1em 0.4em;
+      border-radius: 0.3em;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    /* Benefits List */
+    ul.benefits {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    ul.benefits li {
+      position: relative;
+      padding-left: 1.4rem;
+      margin-bottom: 0.65rem;
+      font-size: 1rem;
+    }
+
+    ul.benefits li:before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.55rem;
+      width: 7px;
+      height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+    }
+
+    /* Testimonials */
+    .testimonials {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+    }
+
+    .testimonial-card {
+      background: var(--review-bg);
+      border: 1.5px solid var(--review-border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+    }
+
+    .verified-badge {
+      display: inline-block;
+      background: var(--green);
+      color: var(--black);
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: 0.5em;
+      padding: 0.15em 0.7em;
+      margin-bottom: 0.6em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .testimonial-quote {
+      font-size: 1.02rem;
+      color: var(--black);
+      margin: 0 0 0.75rem 0;
+      line-height: 1.55;
+    }
+
+    .testimonial-attribution {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    /* Two Column Lists */
+    .two-columns {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.25rem;
+    }
+
+    .column-box {
+      background: var(--gray);
+      border: 1.5px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.25rem;
+    }
+
+    section:nth-child(odd) .column-box {
+      background: var(--gray);
+    }
+
+    .column-box.good-fit {
+      border-color: var(--green);
+    }
+
+    .column-box.not-fit {
+      border-color: #ddd;
+    }
+
+    .column-box h3 {
+      margin-bottom: 0.75rem;
+    }
+
+    .column-box.good-fit h3:before {
+      content: '+ ';
+      color: var(--green);
+    }
+
+    .column-box.not-fit h3:before {
+      content: '- ';
+      color: #999;
+    }
+
+    .column-box ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .column-box ul li {
+      padding: 0.35rem 0;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    /* Format Details */
+    .format-section {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    section:nth-child(odd) .format-section {
+      background: var(--gray);
+    }
+
+    .format-section h3 {
+      margin-bottom: 1rem;
+    }
+
+    .format-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .format-item {
+      font-size: 0.95rem;
+    }
+
+    .format-item strong {
+      display: block;
+      color: var(--black);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 0.2rem;
+    }
+
+    .format-item span {
+      color: #555;
+    }
+
+    /* Footer CTA */
+    .footer-cta {
+      text-align: center;
+      padding: 3rem 0;
+      background: var(--white);
+    }
+
+    .footer-cta p {
+      color: #666;
+      margin-bottom: 1.5rem;
+    }
+
+    .footer-cta .cta-button {
+      display: inline-block;
+      width: auto;
+      padding: 1rem 2.5rem;
+    }
+
+    /* Footer */
+    footer {
+      padding: 1.5rem 0;
+      text-align: center;
+      color: #666;
+      font-size: 0.9rem;
+      background: var(--gray);
+      border-top: 1px solid var(--border);
+    }
+
+    footer a {
+      color: var(--black);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--green);
+    }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      h1 { font-size: 1.8rem; }
+      .pricing-cards { flex-direction: column; align-items: center; }
+      .pricing-card { max-width: 100%; }
+      .stats-row { gap: 1rem; }
+      .stat { min-width: 100px; }
+      .format-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero + Pricing Cards -->
+  <header>
+    <div class="container">
+      <img src="reco-logo.jpg" alt="Recomendo Logo" class="logo">
+      <h1>Advertise on Recomendo</h1>
+      <p class="hero-subtitle">Reach <span id="hero-subscribers">122,000+</span> engaged readers who trust our weekly recommendations.</p>
+    </div>
+
+    <!-- Pricing Cards -->
+    <div class="pricing-cards">
+      <div class="pricing-card featured">
+        <h2>Premium Sponsorship</h2>
+        <div class="slots">1 spot per issue</div>
+        <div class="price-tag">$500</div>
+        <ul>
+          <li>Prime placement above unclassifieds</li>
+          <li>Up to 280 characters, text only</li>
+          <li>Maximum visibility</li>
+          <li>Highest click-through rates</li>
+        </ul>
+        <a href="booking.html" class="cta-button">Book a Sponsorship</a>
+      </div>
+      <div class="pricing-card">
+        <h2>Unclassified Ad</h2>
+        <div class="slots">10 spots per issue</div>
+        <div class="price-tag">$200</div>
+        <ul>
+          <li>Footer placement</li>
+          <li>Up to 280 characters, text only</li>
+          <li>Typically 100-600+ clicks</li>
+          <li>Great value for the audience</li>
+        </ul>
+        <a href="booking.html" class="cta-button">Place an Unclassified</a>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="container">
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-number" id="stat-subscribers">122,000+</div>
+          <div class="stat-label">Subscribers</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number" id="stat-openrate">46%</div>
+          <div class="stat-label">Open Rate</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Testimonials -->
+  <section id="testimonials">
+    <div class="container">
+      <h2>What Advertisers Say</h2>
+      <div class="testimonials" id="testimonials-container">
+        <div class="testimonial-card">
+          <span class="verified-badge">Verified</span>
+          <p class="testimonial-quote">"This placement generated nearly 1,000 clicks, which is 5x more than the estimated amount of clicks. Those clicks yielded over 105 subscribers."</p>
+          <p class="testimonial-attribution">— Brad's Deals</p>
+        </div>
+        <div class="testimonial-card">
+          <span class="verified-badge">Verified</span>
+          <p class="testimonial-quote">"We ran a sponsorship with Recomendo. It ran very smoothly, and we liked the quality of the newsletter. We also got the amount of clicks expected, which worked out to around $1 a click."</p>
+          <p class="testimonial-attribution">— Growth HQ</p>
+        </div>
+        <div class="testimonial-card">
+          <span class="verified-badge">Verified</span>
+          <p class="testimonial-quote">"We've received six signups from this sponsorship and one of them already turned into a customer!"</p>
+          <p class="testimonial-attribution">— Gerger LLC</p>
+        </div>
+        <div class="testimonial-card">
+          <span class="verified-badge">Verified</span>
+          <p class="testimonial-quote">"We saw 39,512 opens, a 49% open rate, and 233 clicks from this sponsorship with Recomendo. Even though there are no conversions, we are very happy with the performance for the rate and subscriber count."</p>
+          <p class="testimonial-attribution">— Resortpass</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Sponsor -->
+  <section id="why-sponsor">
+    <div class="container">
+      <h2>Why Recomendo Works</h2>
+      <p class="section-intro">A hand-written newsletter with a devoted audience that genuinely values each issue.</p>
+      <ul class="benefits">
+        <li><strong>High-trust audience.</strong> Readers subscribe because they trust the editors' taste. That trust extends to sponsors.</li>
+        <li><strong>Strong engagement.</strong> Open rates and click-through rates consistently outperform industry benchmarks.</li>
+        <li><strong>Limited inventory.</strong> Your ad won't compete with a wall of promotions—we keep it clean.</li>
+        <li><strong>Direct response.</strong> Sponsors see measurable results—sign-ups, subscribers, and purchases.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Ad Format Details -->
+  <section id="formats">
+    <div class="container">
+      <h2>Ad Format Details</h2>
+
+      <div class="format-section">
+        <h3>Premium Sponsorship — $500</h3>
+        <div class="format-grid">
+          <div class="format-item">
+            <strong>Placement</strong>
+            <span>Above the unclassifieds, after main recommendations</span>
+          </div>
+          <div class="format-item">
+            <strong>Length</strong>
+            <span>Up to 280 characters, text only</span>
+          </div>
+          <div class="format-item">
+            <strong>Who writes it</strong>
+            <span>You provide copy; we can suggest edits</span>
+          </div>
+          <div class="format-item">
+            <strong>What you provide</strong>
+            <span>Ad copy, URL, and any tracking params</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="format-section">
+        <h3>Unclassified Ad — $200</h3>
+        <div class="format-grid">
+          <div class="format-item">
+            <strong>Placement</strong>
+            <span>Footer section, after premium sponsorship</span>
+          </div>
+          <div class="format-item">
+            <strong>Length</strong>
+            <span>Up to 280 characters, text only</span>
+          </div>
+          <div class="format-item">
+            <strong>Who writes it</strong>
+            <span>You write the copy</span>
+          </div>
+          <div class="format-item">
+            <strong>What you provide</strong>
+            <span>Ad copy and a single destination URL</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fit & Guidelines -->
+  <section id="guidelines">
+    <div class="container">
+      <h2>Is This a Good Fit?</h2>
+      <p class="section-intro">We're selective about sponsors to protect reader trust.</p>
+      <div class="two-columns">
+        <div class="column-box good-fit">
+          <h3>Great Fit</h3>
+          <ul>
+            <li>Thoughtful tools and apps</li>
+            <li>Newsletters with a similar audience</li>
+            <li>Courses and workshops</li>
+            <li>Productivity and creativity software</li>
+            <li>Books, podcasts, quality content</li>
+          </ul>
+        </div>
+        <div class="column-box not-fit">
+          <h3>Not a Fit</h3>
+          <ul>
+            <li>Get-rich-quick or misleading finance</li>
+            <li>Crypto, gambling, speculation</li>
+            <li>Invasive tracking or surveillance tools</li>
+            <li>Political campaigns</li>
+            <li>Anything that conflicts with our values</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer CTA -->
+  <section class="footer-cta">
+    <div class="container">
+      <h2>Ready to Reach Our Readers?</h2>
+      <p>Book directly—spots often fill up weeks in advance.</p>
+      <a href="booking.html" class="cta-button">Book a Sponsorship — $500</a>
+      <span style="display: inline-block; width: 1rem;"></span>
+      <a href="booking.html" class="cta-button secondary">Place an Unclassified — $200</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>Questions? Email <a href="mailto:editor@kk.org">editor@kk.org</a> · © 2025 <a href="https://recomendo.com" target="_blank" rel="noopener">Recomendo</a></p>
+    </div>
+  </footer>
+
+  <script>
+    // Load config and update page dynamically
+    fetch('config.json')
+      .then(response => response.json())
+      .then(config => {
+        // Update stats
+        document.getElementById('hero-subscribers').textContent = config.stats.subscribers;
+        document.getElementById('stat-subscribers').textContent = config.stats.subscribers;
+        document.getElementById('stat-openrate').textContent = config.stats.openRate;
+
+        // Update testimonials
+        const container = document.getElementById('testimonials-container');
+        container.innerHTML = config.testimonials.map(t => `
+          <div class="testimonial-card">
+            <span class="verified-badge">Verified</span>
+            <p class="testimonial-quote">"${t.quote}"</p>
+            <p class="testimonial-attribution">— ${t.company}</p>
+          </div>
+        `).join('');
+      })
+      .catch(err => console.log('Config load error:', err));
+  </script>
+</body>
+</html>
