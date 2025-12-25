@@ -199,22 +199,10 @@
       font-size: 0.9rem;
       line-height: 1.5;
       color: #333;
-      margin-bottom: 0.75rem;
-      white-space: pre-wrap;
     }
 
-    .ad-url {
-      font-size: 0.8rem;
+    .ad-copy-text a {
       color: var(--green);
-      word-break: break-all;
-    }
-
-    .ad-url a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .ad-url a:hover {
       text-decoration: underline;
     }
 
@@ -412,6 +400,21 @@
       return div.innerHTML;
     }
 
+    function formatAdCopy(text, url) {
+      if (!text) return '';
+      // Escape HTML first
+      let formatted = escapeHtml(text);
+      // Convert **text** to <strong>text</strong>
+      formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      // Convert [[text]] to a link
+      if (url) {
+        formatted = formatted.replace(/\[\[(.+?)\]\]/g, `<a href="${escapeHtml(url)}" target="_blank">$1</a>`);
+      } else {
+        formatted = formatted.replace(/\[\[(.+?)\]\]/g, '<span style="color:var(--green);text-decoration:underline;">$1</span>');
+      }
+      return formatted;
+    }
+
     function formatReceiptDate() {
       const now = new Date();
       const options = {
@@ -439,7 +442,7 @@
       `;
       document.getElementById('customerInfo').innerHTML = customerHtml;
 
-      // Ad items with full copy
+      // Ad items with formatted copy (bold and links)
       const adItemsHtml = order.items.map(item => `
         <div class="ad-item">
           <div class="ad-item-header">
@@ -449,9 +452,8 @@
             </div>
             <div class="ad-item-price">$${item.price}</div>
           </div>
-          <div class="ad-copy-label">Ad Copy</div>
-          <div class="ad-copy-text">${escapeHtml(item.adCopy)}</div>
-          <div class="ad-url"><a href="${escapeHtml(item.adUrl)}" target="_blank">${escapeHtml(item.adUrl)}</a></div>
+          <div class="ad-copy-label">Your Ad (as it will appear)</div>
+          <div class="ad-copy-text">${formatAdCopy(item.adCopy, item.adUrl)}</div>
         </div>
       `).join('');
       document.getElementById('adItems').innerHTML = adItemsHtml;
