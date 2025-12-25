@@ -37,8 +37,8 @@
     }
 
     .container {
-      max-width: 550px;
-      padding: 3rem 2rem;
+      max-width: 600px;
+      padding: 2rem 1.5rem;
       text-align: center;
     }
 
@@ -80,61 +80,179 @@
       margin-bottom: 2rem;
     }
 
-    .confirmation-box {
+    /* Receipt Styles */
+    .receipt {
       background: var(--white);
-      border: 1.5px solid var(--border);
-      border-radius: 1rem;
-      padding: 1.5rem;
+      border: 1px solid #ddd;
+      border-radius: 0.5rem;
+      padding: 2rem;
       margin-bottom: 2rem;
       text-align: left;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
 
-    .confirmation-box h2 {
+    .receipt-header {
+      text-align: center;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px dashed #ccc;
+      margin-bottom: 1.5rem;
+    }
+
+    .receipt-header h2 {
       font-family: 'Montserrat', sans-serif;
-      font-size: 0.9rem;
+      font-size: 1.1rem;
       font-weight: 700;
+      margin: 0 0 0.5rem 0;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #888;
-      margin: 0 0 1rem 0;
+      letter-spacing: 1px;
     }
 
-    .order-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 0.75rem 0;
-      border-bottom: 1px solid var(--gray);
-    }
-
-    .order-item:last-child {
-      border-bottom: none;
-    }
-
-    .order-item-type {
-      font-weight: 600;
-    }
-
-    .order-item-date {
-      font-size: 0.9rem;
+    .receipt-date {
+      font-size: 0.85rem;
       color: #666;
     }
 
-    .order-item-price {
+    .receipt-section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px dashed #ccc;
+    }
+
+    .receipt-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .receipt-section-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.75rem;
       font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #999;
+      margin: 0 0 0.75rem 0;
+    }
+
+    .customer-info {
+      font-size: 0.95rem;
+    }
+
+    .customer-info div {
+      margin-bottom: 0.25rem;
+    }
+
+    .customer-label {
+      color: #666;
+    }
+
+    /* Ad Items */
+    .ad-item {
+      background: var(--gray);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .ad-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .ad-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .ad-item-type {
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .ad-item-type.premium {
+      color: #b8860b;
+    }
+
+    .ad-item-date {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 0.15rem;
+    }
+
+    .ad-item-price {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .ad-copy-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: #888;
+      margin-bottom: 0.35rem;
+    }
+
+    .ad-copy-text {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #333;
+      margin-bottom: 0.75rem;
+      white-space: pre-wrap;
+    }
+
+    .ad-url {
+      font-size: 0.8rem;
+      color: var(--green);
+      word-break: break-all;
+    }
+
+    .ad-url a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .ad-url a:hover {
+      text-decoration: underline;
+    }
+
+    /* Totals */
+    .receipt-totals {
+      margin-top: 1rem;
     }
 
     .total-row {
       display: flex;
       justify-content: space-between;
+      padding: 0.5rem 0;
+      font-size: 0.95rem;
+    }
+
+    .total-row.grand-total {
       padding-top: 1rem;
       margin-top: 0.5rem;
       border-top: 2px solid var(--black);
       font-weight: 700;
+      font-size: 1.1rem;
     }
 
     .total-amount {
       font-family: 'Montserrat', sans-serif;
-      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .paid-badge {
+      display: inline-block;
+      background: var(--green);
+      color: var(--black);
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.2em 0.6em;
+      border-radius: 0.25em;
+      margin-left: 0.5rem;
     }
 
     .next-steps {
@@ -224,10 +342,24 @@
     <h1>Order Confirmed!</h1>
     <p class="subtitle">Thanks for advertising with Recomendo. We've sent a confirmation to your email.</p>
 
-    <div class="confirmation-box" id="orderDetails">
-      <h2>Your Order</h2>
-      <div id="orderItems">
-        <!-- Populated by JavaScript -->
+    <div class="receipt" id="orderDetails">
+      <div class="receipt-header">
+        <h2>Order Receipt</h2>
+        <div class="receipt-date" id="receiptDate"></div>
+      </div>
+
+      <div class="receipt-section" id="customerSection">
+        <div class="receipt-section-title">Billed To</div>
+        <div class="customer-info" id="customerInfo"></div>
+      </div>
+
+      <div class="receipt-section">
+        <div class="receipt-section-title">Ad Bookings</div>
+        <div id="adItems"></div>
+      </div>
+
+      <div class="receipt-section">
+        <div class="receipt-totals" id="receiptTotals"></div>
       </div>
     </div>
 
@@ -273,25 +405,69 @@
       }
     }
 
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatReceiptDate() {
+      const now = new Date();
+      const options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      };
+      return now.toLocaleDateString('en-US', options);
+    }
+
     function renderOrderDetails(order) {
-      const container = document.getElementById('orderItems');
       const total = order.items.reduce((sum, item) => sum + item.price, 0);
 
-      container.innerHTML = `
-        ${order.items.map(item => `
-          <div class="order-item">
+      // Receipt date
+      document.getElementById('receiptDate').textContent = formatReceiptDate();
+
+      // Customer info
+      const customerHtml = `
+        <div><strong>${escapeHtml(order.name)}</strong></div>
+        <div>${escapeHtml(order.email)}</div>
+        ${order.company ? `<div>${escapeHtml(order.company)}</div>` : ''}
+      `;
+      document.getElementById('customerInfo').innerHTML = customerHtml;
+
+      // Ad items with full copy
+      const adItemsHtml = order.items.map(item => `
+        <div class="ad-item">
+          <div class="ad-item-header">
             <div>
-              <div class="order-item-type">${item.type === 'premium' ? 'Premium Sponsorship' : 'Unclassified Ad'}</div>
-              <div class="order-item-date">Issue #${item.issueNumber} · ${item.dateFormatted}</div>
+              <div class="ad-item-type ${item.type}">${item.type === 'premium' ? 'Premium Sponsorship' : 'Unclassified Ad'}</div>
+              <div class="ad-item-date">Issue #${item.issueNumber} · ${item.dateFormatted}</div>
             </div>
-            <div class="order-item-price">$${item.price}</div>
+            <div class="ad-item-price">$${item.price}</div>
           </div>
-        `).join('')}
+          <div class="ad-copy-label">Ad Copy</div>
+          <div class="ad-copy-text">${escapeHtml(item.adCopy)}</div>
+          <div class="ad-url"><a href="${escapeHtml(item.adUrl)}" target="_blank">${escapeHtml(item.adUrl)}</a></div>
+        </div>
+      `).join('');
+      document.getElementById('adItems').innerHTML = adItemsHtml;
+
+      // Totals
+      const totalsHtml = `
         <div class="total-row">
-          <span>Total Paid</span>
+          <span>${order.items.length} ad${order.items.length > 1 ? 's' : ''}</span>
+          <span>$${total}</span>
+        </div>
+        <div class="total-row grand-total">
+          <span>Total Paid <span class="paid-badge">Paid</span></span>
           <span class="total-amount">$${total}</span>
         </div>
       `;
+      document.getElementById('receiptTotals').innerHTML = totalsHtml;
     }
 
     init();
