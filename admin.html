@@ -370,6 +370,124 @@
     }
     .save-status.success { color: #27ae60; }
     .save-status.error { color: #e74c3c; }
+
+    /* View Toggle */
+    .view-toggle {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+    }
+    .view-toggle button {
+      padding: 10px 20px;
+      border: 1px solid #ddd;
+      background: #f5f5f5;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+    }
+    .view-toggle button:first-child {
+      border-radius: 4px 0 0 4px;
+    }
+    .view-toggle button:last-child {
+      border-radius: 0 4px 4px 0;
+      border-left: none;
+    }
+    .view-toggle button.active {
+      background: #8fd14f;
+      border-color: #8fd14f;
+      color: #333;
+    }
+
+    /* Issue View */
+    .issue-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .issue-header {
+      background: #f8f8f8;
+      padding: 16px 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .issue-title {
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .issue-title span {
+      color: #666;
+      font-weight: 400;
+      font-size: 14px;
+      margin-left: 8px;
+    }
+    .issue-meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .issue-count {
+      background: #e8e8e8;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      color: #666;
+    }
+    .copy-all-btn {
+      background: #8fd14f;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .copy-all-btn:hover { background: #7ac043; }
+    .issue-ads {
+      padding: 16px 20px;
+    }
+    .issue-ad-item {
+      display: flex;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+      align-items: flex-start;
+    }
+    .issue-ad-item:last-child {
+      border-bottom: none;
+    }
+    .issue-ad-type {
+      min-width: 100px;
+    }
+    .issue-ad-content {
+      flex: 1;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .issue-ad-content a {
+      color: #8fd14f;
+      text-decoration: underline;
+    }
+    .issue-ad-customer {
+      min-width: 150px;
+      font-size: 13px;
+      color: #666;
+      text-align: right;
+    }
+    .issue-ad-actions {
+      display: flex;
+      gap: 4px;
+    }
+    #listView, #issueView {
+      display: none;
+    }
+    #listView.active, #issueView.active {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -401,9 +519,24 @@
         </div>
       </div>
 
-      <div class="orders-table">
-        <h2>Ad Schedule</h2>
-        <div id="ordersContent">
+      <div class="view-toggle">
+        <button class="active" onclick="switchView('list')">List View</button>
+        <button onclick="switchView('issue')">Issue View</button>
+      </div>
+
+      <!-- List View -->
+      <div id="listView" class="active">
+        <div class="orders-table">
+          <h2>Ad Schedule</h2>
+          <div id="ordersContent">
+            <div class="loading">Loading orders...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Issue View -->
+      <div id="issueView">
+        <div id="issueViewContent">
           <div class="loading">Loading orders...</div>
         </div>
       </div>
@@ -590,6 +723,163 @@
 
       html += '</tbody></table>';
       document.getElementById('ordersContent').innerHTML = html;
+
+      // Also render Issue View
+      renderIssueView(orders);
+    }
+
+    function renderIssueView(orders) {
+      if (orders.length === 0) {
+        document.getElementById('issueViewContent').innerHTML = '<div class="no-orders">No orders yet</div>';
+        return;
+      }
+
+      // Group orders by issue number
+      const issueGroups = {};
+      for (const order of orders) {
+        const key = order.issueNumber;
+        if (!issueGroups[key]) {
+          issueGroups[key] = {
+            issueNumber: order.issueNumber,
+            dateFormatted: order.dateFormatted,
+            issueDate: order.issueDate,
+            ads: []
+          };
+        }
+        issueGroups[key].ads.push(order);
+      }
+
+      // Sort issues by date
+      const sortedIssues = Object.values(issueGroups).sort((a, b) =>
+        new Date(a.issueDate) - new Date(b.issueDate)
+      );
+
+      let html = '';
+      for (const issue of sortedIssues) {
+        const premiumCount = issue.ads.filter(a => a.type === 'premium').length;
+        const unclassifiedCount = issue.ads.filter(a => a.type === 'unclassified').length;
+
+        html += `
+          <div class="issue-card" data-issue="${issue.issueNumber}">
+            <div class="issue-header">
+              <div class="issue-title">
+                Issue #${issue.issueNumber}
+                <span>${issue.dateFormatted}</span>
+              </div>
+              <div class="issue-meta">
+                <span class="issue-count">
+                  ${premiumCount ? premiumCount + ' Premium' : ''}
+                  ${premiumCount && unclassifiedCount ? ' · ' : ''}
+                  ${unclassifiedCount ? unclassifiedCount + ' Unclassified' : ''}
+                </span>
+                <button class="copy-all-btn" onclick="copyAllForIssue('${issue.issueNumber}')">Copy All</button>
+              </div>
+            </div>
+            <div class="issue-ads">`;
+
+        // Sort ads: premium first, then unclassified
+        const sortedAds = [...issue.ads].sort((a, b) => {
+          if (a.type === 'premium' && b.type !== 'premium') return -1;
+          if (a.type !== 'premium' && b.type === 'premium') return 1;
+          return 0;
+        });
+
+        for (const ad of sortedAds) {
+          const badgeClass = ad.type === 'premium' ? 'premium' : 'unclassified';
+          const typeName = ad.type === 'premium' ? 'Premium' : 'Unclassified';
+
+          html += `
+              <div class="issue-ad-item">
+                <div class="issue-ad-type">
+                  <span class="badge ${badgeClass}">${typeName}</span>
+                </div>
+                <div class="issue-ad-content">${formatAdCopy(ad.adCopy, ad.adUrl)}</div>
+                <div class="issue-ad-customer">${escapeHtml(ad.customerName)}</div>
+                <div class="issue-ad-actions">
+                  <button class="action-btn copy" onclick="copyAd('${ad.adId}')" title="Copy">Copy</button>
+                  <button class="action-btn edit" onclick="editAd('${ad.adId}')" title="Edit">Edit</button>
+                </div>
+              </div>`;
+        }
+
+        html += `
+            </div>
+          </div>`;
+      }
+
+      document.getElementById('issueViewContent').innerHTML = html;
+    }
+
+    function switchView(view) {
+      const listView = document.getElementById('listView');
+      const issueView = document.getElementById('issueView');
+      const buttons = document.querySelectorAll('.view-toggle button');
+
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      if (view === 'list') {
+        listView.classList.add('active');
+        issueView.classList.remove('active');
+        buttons[0].classList.add('active');
+      } else {
+        listView.classList.remove('active');
+        issueView.classList.add('active');
+        buttons[1].classList.add('active');
+      }
+    }
+
+    function copyAllForIssue(issueNumber) {
+      // Find all ads for this issue
+      const ads = Object.values(window.orderData || {}).filter(
+        order => String(order.issueNumber) === String(issueNumber)
+      );
+
+      if (ads.length === 0) return;
+
+      // Sort: premium first
+      ads.sort((a, b) => {
+        if (a.type === 'premium' && b.type !== 'premium') return -1;
+        if (a.type !== 'premium' && b.type === 'premium') return 1;
+        return 0;
+      });
+
+      // Build HTML for all ads
+      let html = '';
+      for (const ad of ads) {
+        let adHtml = ad.adCopy;
+        adHtml = adHtml.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+        adHtml = adHtml.replace(/\[\[(.+?)\]\]/g, `<a href="${ad.adUrl}">$1</a>`);
+
+        if (ad.type === 'premium') {
+          html += `<p><strong>[SPONSOR]</strong> ${adHtml}</p>\n`;
+        } else {
+          html += `<p>${adHtml}</p>\n`;
+        }
+      }
+
+      // Copy as HTML
+      const blob = new Blob([html], { type: 'text/html' });
+      const plainBlob = new Blob([html], { type: 'text/plain' });
+
+      navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': blob,
+          'text/plain': plainBlob
+        })
+      ]).then(() => {
+        const btn = document.querySelector(`.issue-card[data-issue="${issueNumber}"] .copy-all-btn`);
+        const originalText = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.style.background = '#7ac043';
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.style.background = '';
+        }, 1500);
+      }).catch(err => {
+        console.error('Copy failed:', err);
+        navigator.clipboard.writeText(html);
+        alert('Copied as plain text');
+      });
     }
 
     function escapeHtml(text) {
