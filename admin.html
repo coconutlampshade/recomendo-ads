@@ -371,6 +371,37 @@
     .save-status.success { color: #27ae60; }
     .save-status.error { color: #e74c3c; }
 
+    /* Time Filter (Upcoming/Past) */
+    .time-filter {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .time-filter button {
+      padding: 8px 16px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #666;
+    }
+    .time-filter button.active {
+      background: #333;
+      border-color: #333;
+      color: white;
+    }
+    .time-filter button .count {
+      background: rgba(0,0,0,0.1);
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      margin-left: 4px;
+    }
+    .time-filter button.active .count {
+      background: rgba(255,255,255,0.2);
+    }
+
     /* View Toggle */
     .view-toggle {
       display: flex;
@@ -519,6 +550,15 @@
         </div>
       </div>
 
+      <div class="time-filter">
+        <button class="active" onclick="switchTimeFilter('upcoming')">
+          Upcoming <span class="count" id="upcomingCount">0</span>
+        </button>
+        <button onclick="switchTimeFilter('past')">
+          Past <span class="count" id="pastCount">0</span>
+        </button>
+      </div>
+
       <div class="view-toggle">
         <button class="active" onclick="switchView('list')">List View</button>
         <button onclick="switchView('issue')">Issue View</button>
@@ -655,6 +695,8 @@
         document.getElementById('dashboard').classList.add('visible');
         document.getElementById('loginError').textContent = '';
 
+        // Store data globally for filtering
+        window.allOrdersData = data;
         renderOrders(data);
       } catch (err) {
         document.getElementById('loginError').textContent = 'Error connecting to server';
@@ -662,21 +704,54 @@
       }
     }
 
+    let currentTimeFilter = 'upcoming';
+
+    function switchTimeFilter(filter) {
+      currentTimeFilter = filter;
+      const buttons = document.querySelectorAll('.time-filter button');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      buttons[filter === 'upcoming' ? 0 : 1].classList.add('active');
+
+      if (window.allOrdersData) {
+        renderOrdersList(filter === 'upcoming' ? window.allOrdersData.orders : window.allOrdersData.pastOrders);
+        renderIssueView(filter === 'upcoming' ? window.allOrdersData.orders : window.allOrdersData.pastOrders);
+      }
+    }
+
     function renderOrders(data) {
-      const { orders, stats } = data;
+      const { orders, pastOrders = [], stats } = data;
 
       // Update stats
       document.getElementById('totalOrders').textContent = stats.totalOrders;
       document.getElementById('totalRevenue').textContent = '$' + stats.totalRevenue.toLocaleString();
       document.getElementById('upcomingAds').textContent = stats.upcomingAds;
 
+      // Update time filter counts
+      document.getElementById('upcomingCount').textContent = orders.length;
+      document.getElementById('pastCount').textContent = pastOrders.length;
+
+      // Store all order data for copy/edit
+      window.orderData = window.orderData || {};
+      for (const order of [...orders, ...pastOrders]) {
+        window.orderData[order.adId] = order;
+      }
+
+      // Render current filter
+      const currentOrders = currentTimeFilter === 'upcoming' ? orders : pastOrders;
+      renderOrdersList(currentOrders);
+      renderIssueView(currentOrders);
+    }
+
+    function renderOrdersList(orders) {
       if (orders.length === 0) {
-        document.getElementById('ordersContent').innerHTML = '<div class="no-orders">No orders yet</div>';
+        document.getElementById('ordersContent').innerHTML = `<div class="no-orders">No ${currentTimeFilter} ads</div>`;
         return;
       }
 
-      // Sort by issue date
-      orders.sort((a, b) => new Date(a.issueDate) - new Date(b.issueDate));
+      // Sort by issue date (ascending for upcoming, already descending for past)
+      if (currentTimeFilter === 'upcoming') {
+        orders.sort((a, b) => new Date(a.issueDate) - new Date(b.issueDate));
+      }
 
       let html = `<table>
         <thead>
@@ -694,10 +769,6 @@
       for (const order of orders) {
         const badgeClass = order.type === 'premium' ? 'premium' : 'unclassified';
         const typeName = order.type === 'premium' ? 'Premium' : 'Unclassified';
-
-        // Store order data for edit/copy functions
-        window.orderData = window.orderData || {};
-        window.orderData[order.adId] = order;
 
         html += `<tr id="row-${order.adId}">
           <td class="issue-date">
@@ -723,14 +794,11 @@
 
       html += '</tbody></table>';
       document.getElementById('ordersContent').innerHTML = html;
-
-      // Also render Issue View
-      renderIssueView(orders);
     }
 
     function renderIssueView(orders) {
       if (orders.length === 0) {
-        document.getElementById('issueViewContent').innerHTML = '<div class="no-orders">No orders yet</div>';
+        document.getElementById('issueViewContent').innerHTML = `<div class="no-orders">No ${currentTimeFilter} ads</div>`;
         return;
       }
 

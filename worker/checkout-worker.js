@@ -656,23 +656,38 @@ async function handleAdminOrders(request, env) {
       }
     }
 
-    // Filter to only future/upcoming ads (or all if date parsing fails)
+    // Split into upcoming and past ads
     const now = new Date();
-    const upcomingOrders = orders.filter(o => {
-      if (!o.issueDate) return true;
-      try {
-        return new Date(o.issueDate) >= now;
-      } catch {
-        return true;
+    const upcomingOrders = [];
+    const pastOrders = [];
+
+    for (const order of orders) {
+      if (!order.issueDate) {
+        upcomingOrders.push(order);
+      } else {
+        try {
+          if (new Date(order.issueDate) >= now) {
+            upcomingOrders.push(order);
+          } else {
+            pastOrders.push(order);
+          }
+        } catch {
+          upcomingOrders.push(order);
+        }
       }
-    });
+    }
+
+    // Sort past orders by date descending (most recent first)
+    pastOrders.sort((a, b) => new Date(b.issueDate) - new Date(a.issueDate));
 
     return new Response(JSON.stringify({
       orders: upcomingOrders,
+      pastOrders: pastOrders,
       stats: {
         totalOrders: data.data.length,
         totalRevenue: totalRevenue,
-        upcomingAds: upcomingOrders.length
+        upcomingAds: upcomingOrders.length,
+        pastAds: pastOrders.length
       }
     }), {
       headers: corsHeaders()
