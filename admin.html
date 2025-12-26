@@ -120,23 +120,119 @@
     .loading { text-align: center; padding: 40px; color: #666; }
     .no-orders { text-align: center; padding: 40px; color: #666; }
 
-    .delete-btn {
+    .action-btn {
       background: none;
       border: 1px solid #ddd;
-      color: #999;
+      color: #666;
       padding: 4px 10px;
       border-radius: 4px;
       cursor: pointer;
       font-size: 12px;
+      margin-right: 4px;
+      margin-bottom: 4px;
     }
-    .delete-btn:hover {
+    .action-btn:hover {
+      background: #f5f5f5;
+      border-color: #999;
+    }
+    .action-btn.copy:hover {
+      background: #e8f5e9;
+      border-color: #8fd14f;
+      color: #333;
+    }
+    .action-btn.edit:hover {
+      background: #fff8e1;
+      border-color: #f9a825;
+      color: #333;
+    }
+    .action-btn.delete:hover {
       background: #fee;
       border-color: #e74c3c;
       color: #e74c3c;
     }
-    .delete-btn:disabled {
+    .action-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+    }
+    .actions-cell {
+      white-space: nowrap;
+    }
+
+    /* Edit Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.visible {
+      display: flex;
+    }
+    .modal {
+      background: white;
+      border-radius: 8px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal h3 {
+      margin: 0 0 16px 0;
+    }
+    .modal .form-group {
+      margin-bottom: 16px;
+    }
+    .modal label {
+      display: block;
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 4px;
+      color: #555;
+    }
+    .modal input, .modal textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .modal textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    .modal-btn {
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .modal-btn.cancel {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      color: #666;
+    }
+    .modal-btn.save {
+      background: #8fd14f;
+      border: none;
+      color: #333;
+    }
+    .modal-btn.save:hover {
+      background: #7ac043;
     }
 
     .logout-btn {
@@ -357,6 +453,30 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+      <div class="modal">
+        <h3>Edit Ad</h3>
+        <input type="hidden" id="edit-adId">
+        <div class="form-group">
+          <label>Ad Copy</label>
+          <textarea id="edit-adCopy" placeholder="Use **bold** and [[link text]]"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Destination URL</label>
+          <input type="url" id="edit-adUrl" placeholder="https://example.com">
+        </div>
+        <div class="form-group">
+          <label>Preview</label>
+          <div id="edit-preview" style="background:#f5f5f5;padding:12px;border-radius:4px;font-size:14px;line-height:1.5;min-height:40px;"></div>
+        </div>
+        <div class="modal-buttons">
+          <button class="modal-btn cancel" onclick="closeEditModal()">Cancel</button>
+          <button class="modal-btn save" onclick="saveEdit()">Save Changes</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -442,6 +562,10 @@
         const badgeClass = order.type === 'premium' ? 'premium' : 'unclassified';
         const typeName = order.type === 'premium' ? 'Premium' : 'Unclassified';
 
+        // Store order data for edit/copy functions
+        window.orderData = window.orderData || {};
+        window.orderData[order.adId] = order;
+
         html += `<tr id="row-${order.adId}">
           <td class="issue-date">
             <strong>#${order.issueNumber}</strong><br>
@@ -453,10 +577,14 @@
             <span style="color:#666;font-size:13px">${escapeHtml(order.customerEmail)}</span>
           </td>
           <td>
-            <div class="ad-copy">${formatAdCopy(order.adCopy, order.adUrl)}</div>
+            <div class="ad-copy" id="adcopy-${order.adId}">${formatAdCopy(order.adCopy, order.adUrl)}</div>
           </td>
           <td><strong>$${order.price}</strong></td>
-          <td><button class="delete-btn" onclick="deleteAd('${order.adId}')">Delete</button></td>
+          <td class="actions-cell">
+            <button class="action-btn copy" onclick="copyAd('${order.adId}')">Copy</button>
+            <button class="action-btn edit" onclick="editAd('${order.adId}')">Edit</button>
+            <button class="action-btn delete" onclick="deleteAd('${order.adId}')">Delete</button>
+          </td>
         </tr>`;
       }
 
@@ -541,6 +669,127 @@
         }
       }
     }
+
+    // ============================================
+    // COPY AD
+    // ============================================
+
+    function copyAd(adId) {
+      const order = window.orderData[adId];
+      if (!order) return;
+
+      // Format for newsletter: convert **bold** and [[link]] to HTML
+      let html = order.adCopy;
+      html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+      html = html.replace(/\[\[(.+?)\]\]/g, `<a href="${order.adUrl}">$1</a>`);
+
+      // Copy as HTML to clipboard
+      const blob = new Blob([html], { type: 'text/html' });
+      const plainBlob = new Blob([html], { type: 'text/plain' });
+
+      navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': blob,
+          'text/plain': plainBlob
+        })
+      ]).then(() => {
+        // Show feedback
+        const btn = document.querySelector(`#row-${adId} .action-btn.copy`);
+        const originalText = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.style.background = '#e8f5e9';
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.style.background = '';
+        }, 1500);
+      }).catch(err => {
+        console.error('Copy failed:', err);
+        // Fallback: copy plain text
+        navigator.clipboard.writeText(html);
+        alert('Copied as plain text (HTML copy not supported in this browser)');
+      });
+    }
+
+    // ============================================
+    // EDIT AD
+    // ============================================
+
+    function editAd(adId) {
+      const order = window.orderData[adId];
+      if (!order) return;
+
+      document.getElementById('edit-adId').value = adId;
+      document.getElementById('edit-adCopy').value = order.adCopy;
+      document.getElementById('edit-adUrl').value = order.adUrl;
+      updateEditPreview();
+
+      document.getElementById('editModal').classList.add('visible');
+
+      // Update preview on input
+      document.getElementById('edit-adCopy').oninput = updateEditPreview;
+      document.getElementById('edit-adUrl').oninput = updateEditPreview;
+    }
+
+    function updateEditPreview() {
+      const adCopy = document.getElementById('edit-adCopy').value;
+      const adUrl = document.getElementById('edit-adUrl').value;
+      document.getElementById('edit-preview').innerHTML = formatAdCopy(adCopy, adUrl) || '<span style="color:#999">Preview will appear here...</span>';
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('visible');
+    }
+
+    async function saveEdit() {
+      const adId = document.getElementById('edit-adId').value;
+      const adCopy = document.getElementById('edit-adCopy').value;
+      const adUrl = document.getElementById('edit-adUrl').value;
+
+      const password = sessionStorage.getItem('adminPass');
+      if (!password) {
+        alert('Please log in again');
+        return;
+      }
+
+      const saveBtn = document.querySelector('.modal-btn.save');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+
+      try {
+        const response = await fetch(`${WORKER_URL}/admin/edit`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${password}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ adId, adCopy, adUrl })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save');
+        }
+
+        // Update local data
+        window.orderData[adId].adCopy = adCopy;
+        window.orderData[adId].adUrl = adUrl;
+
+        // Update the table cell
+        document.getElementById(`adcopy-${adId}`).innerHTML = formatAdCopy(adCopy, adUrl);
+
+        closeEditModal();
+      } catch (err) {
+        alert('Failed to save changes');
+        console.error(err);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Changes';
+      }
+    }
+
+    // Close modal on overlay click
+    document.getElementById('editModal').addEventListener('click', function(e) {
+      if (e.target === this) closeEditModal();
+    });
 
     // ============================================
     // CONFIG EDITOR
