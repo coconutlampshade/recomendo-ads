@@ -5,11 +5,10 @@ name = "recomendo-ads-checkout"
 main = "checkout-worker.js"
 compatibility_date = "2024-01-01"
 
-# Optional: KV namespace for storing order data between checkout and webhook
-# Uncomment and create a KV namespace in Cloudflare dashboard if needed
-# [[kv_namespaces]]
-# binding = "ORDERS_KV"
-# id = "your-kv-namespace-id"
+# KV namespace for storing order data, edits, and config
+[[kv_namespaces]]
+binding = "ORDERS_KV"
+id = "234065765b53429da31028bf7ab5d753"
 
 # Environment variables (set these in Cloudflare dashboard for security)
 # [vars]

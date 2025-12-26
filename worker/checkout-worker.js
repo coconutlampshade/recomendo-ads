@@ -77,6 +77,17 @@ export default {
       return handleEditAd(request, env);
     }
 
+    if (url.pathname === '/admin/edits' && request.method === 'GET') {
+      // Debug endpoint to check edited ads
+      const authHeader = request.headers.get('Authorization');
+      const password = authHeader?.replace('Bearer ', '');
+      if (password !== env.ADMIN_PASSWORD) {
+        return new Response('Unauthorized', { status: 401, headers: corsHeaders() });
+      }
+      const edits = await getEditedAds(env);
+      return new Response(JSON.stringify(edits), { headers: corsHeaders() });
+    }
+
     if (url.pathname === '/config') {
       return handleGetConfig(request, env);
     }
