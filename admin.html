@@ -565,12 +565,12 @@
       </div>
 
       <div class="view-toggle">
-        <button class="active" onclick="switchView('list')">List View</button>
-        <button onclick="switchView('issue')">Issue View</button>
+        <button onclick="switchView('list')">List View</button>
+        <button class="active" onclick="switchView('issue')">Issue View</button>
       </div>
 
       <!-- List View -->
-      <div id="listView" class="active">
+      <div id="listView">
         <div class="orders-table">
           <h2>Ad Schedule</h2>
           <div id="ordersContent">
@@ -580,7 +580,7 @@
       </div>
 
       <!-- Issue View -->
-      <div id="issueView">
+      <div id="issueView" class="active">
         <div id="issueViewContent">
           <div class="loading">Loading orders...</div>
         </div>
