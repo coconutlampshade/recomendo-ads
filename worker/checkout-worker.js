@@ -73,6 +73,10 @@ export default {
       return handleDeleteAd(request, env);
     }
 
+    if (url.pathname === '/admin/edit' && request.method === 'POST') {
+      return handleEditAd(request, env);
+    }
+
     if (url.pathname === '/config') {
       return handleGetConfig(request, env);
     }
@@ -582,6 +586,9 @@ async function handleAdminOrders(request, env) {
     // Get cancelled ads list
     const cancelledAds = await getCancelledAds(env);
 
+    // Get edited ads
+    const editedAds = await getEditedAds(env);
+
     for (const session of data.data) {
       if (session.payment_status !== 'paid') continue;
 
@@ -614,6 +621,11 @@ async function handleAdminOrders(request, env) {
         // Skip cancelled ads
         if (cancelledAds.includes(adId)) continue;
 
+        // Apply any edits
+        const edit = editedAds[adId];
+        const adCopy = edit?.adCopy || item.adCopy || '';
+        const adUrl = edit?.adUrl || item.adUrl || '';
+
         orders.push({
           adId,
           sessionId: session.id,
@@ -624,10 +636,11 @@ async function handleAdminOrders(request, env) {
           issueNumber: item.issueNumber || '?',
           dateFormatted: item.dateFormatted || '',
           issueDate: item.dateStr || item.date || '',
-          adCopy: item.adCopy || '',
-          adUrl: item.adUrl || '',
+          adCopy,
+          adUrl,
           price: item.price || 0,
-          paidAt: new Date(session.created * 1000).toISOString()
+          paidAt: new Date(session.created * 1000).toISOString(),
+          edited: !!edit
         });
       }
     }
@@ -800,12 +813,75 @@ async function handleDeleteAd(request, env) {
 }
 
 /**
+ * Edit an ad's copy and URL
+ */
+async function handleEditAd(request, env) {
+  // Handle CORS preflight
+  if (request.method === 'OPTIONS') {
+    return handleCors();
+  }
+
+  // Check authorization
+  const authHeader = request.headers.get('Authorization');
+  const password = authHeader?.replace('Bearer ', '');
+
+  if (!password || password !== env.ADMIN_PASSWORD) {
+    return new Response('Unauthorized', {
+      status: 401,
+      headers: corsHeaders()
+    });
+  }
+
+  try {
+    const { adId, adCopy, adUrl } = await request.json();
+
+    if (!adId || !adCopy || !adUrl) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+        status: 400,
+        headers: corsHeaders()
+      });
+    }
+
+    // Store edited ad data in KV
+    if (env.ORDERS_KV) {
+      // Get existing edits
+      const editsJson = await env.ORDERS_KV.get('edited_ads');
+      const edits = editsJson ? JSON.parse(editsJson) : {};
+
+      // Store the edit
+      edits[adId] = { adCopy, adUrl, editedAt: new Date().toISOString() };
+      await env.ORDERS_KV.put('edited_ads', JSON.stringify(edits));
+    }
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: corsHeaders()
+    });
+
+  } catch (error) {
+    console.error('Edit error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to edit ad' }), {
+      status: 500,
+      headers: corsHeaders()
+    });
+  }
+}
+
+/**
  * Get list of cancelled ad IDs
  */
 async function getCancelledAds(env) {
   if (!env.ORDERS_KV) return [];
   const cancelledJson = await env.ORDERS_KV.get('cancelled_ads');
   return cancelledJson ? JSON.parse(cancelledJson) : [];
+}
+
+/**
+ * Get edited ads data
+ */
+async function getEditedAds(env) {
+  if (!env.ORDERS_KV) return {};
+  const editsJson = await env.ORDERS_KV.get('edited_ads');
+  return editsJson ? JSON.parse(editsJson) : {};
 }
 
 /**
