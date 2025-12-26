@@ -636,6 +636,7 @@ async function handleAdminOrders(request, env) {
         const edit = editedAds[adId];
         const adCopy = edit?.adCopy || item.adCopy || '';
         const adUrl = edit?.adUrl || item.adUrl || '';
+        const notes = edit?.notes || '';
 
         orders.push({
           adId,
@@ -649,6 +650,7 @@ async function handleAdminOrders(request, env) {
           issueDate: item.dateStr || item.date || '',
           adCopy,
           adUrl,
+          notes,
           price: item.price || 0,
           paidAt: new Date(session.created * 1000).toISOString(),
           edited: !!edit
@@ -859,7 +861,7 @@ async function handleEditAd(request, env) {
   }
 
   try {
-    const { adId, adCopy, adUrl } = await request.json();
+    const { adId, adCopy, adUrl, notes } = await request.json();
 
     if (!adId || !adCopy || !adUrl) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
@@ -874,8 +876,8 @@ async function handleEditAd(request, env) {
       const editsJson = await env.ORDERS_KV.get('edited_ads');
       const edits = editsJson ? JSON.parse(editsJson) : {};
 
-      // Store the edit
-      edits[adId] = { adCopy, adUrl, editedAt: new Date().toISOString() };
+      // Store the edit (notes can be empty string)
+      edits[adId] = { adCopy, adUrl, notes: notes || '', editedAt: new Date().toISOString() };
       await env.ORDERS_KV.put('edited_ads', JSON.stringify(edits));
     }
 

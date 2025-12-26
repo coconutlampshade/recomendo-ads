@@ -117,6 +117,23 @@
     }
     .issue-date { white-space: nowrap; }
 
+    .notes-indicator {
+      display: inline-block;
+      background: #fff3cd;
+      color: #856404;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-top: 4px;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .notes-indicator:before {
+      content: "📝 ";
+    }
+
     .loading { text-align: center; padding: 40px; color: #666; }
     .no-orders { text-align: center; padding: 40px; color: #666; }
 
@@ -649,6 +666,10 @@
           <label>Preview</label>
           <div id="edit-preview" style="background:#f5f5f5;padding:12px;border-radius:4px;font-size:14px;line-height:1.5;min-height:40px;"></div>
         </div>
+        <div class="form-group">
+          <label>Internal Notes <span style="font-weight:normal;color:#999;">(only visible to you)</span></label>
+          <textarea id="edit-notes" placeholder="e.g. VIP customer, requested change, follow up needed..."></textarea>
+        </div>
         <div class="modal-buttons">
           <button class="modal-btn cancel" onclick="closeEditModal()">Cancel</button>
           <button class="modal-btn save" onclick="saveEdit()">Save Changes</button>
@@ -786,7 +807,7 @@
             <span style="color:#666;font-size:13px">${escapeHtml(order.customerEmail)}</span>
           </td>
           <td>
-            <div class="ad-copy" id="adcopy-${order.adId}">${formatAdCopy(order.adCopy, order.adUrl)}</div>
+            <div class="ad-copy" id="adcopy-${order.adId}">${formatAdCopy(order.adCopy, order.adUrl)}${order.notes ? `<div class="notes-indicator" title="${escapeHtml(order.notes)}">${escapeHtml(order.notes)}</div>` : ''}</div>
           </td>
           <td><strong>$${order.price}</strong></td>
           <td class="actions-cell">
@@ -867,7 +888,7 @@
                 <div class="issue-ad-type">
                   <span class="badge ${badgeClass}">${typeName}</span>
                 </div>
-                <div class="issue-ad-content">${formatAdCopy(ad.adCopy, ad.adUrl)}</div>
+                <div class="issue-ad-content">${formatAdCopy(ad.adCopy, ad.adUrl)}${ad.notes ? `<div class="notes-indicator" title="${escapeHtml(ad.notes)}">${escapeHtml(ad.notes)}</div>` : ''}</div>
                 <div class="issue-ad-customer">${escapeHtml(ad.customerName)}</div>
                 <div class="issue-ad-actions">
                   <button class="action-btn copy" onclick="copyAd('${ad.adId}')" title="Copy">Copy</button>
@@ -1127,6 +1148,7 @@ Link: ${order.adUrl}
       document.getElementById('edit-adId').value = adId;
       document.getElementById('edit-adCopy').value = order.adCopy;
       document.getElementById('edit-adUrl').value = order.adUrl;
+      document.getElementById('edit-notes').value = order.notes || '';
       updateEditPreview();
 
       document.getElementById('editModal').classList.add('visible');
@@ -1150,6 +1172,7 @@ Link: ${order.adUrl}
       const adId = document.getElementById('edit-adId').value;
       const adCopy = document.getElementById('edit-adCopy').value;
       const adUrl = document.getElementById('edit-adUrl').value;
+      const notes = document.getElementById('edit-notes').value;
 
       const password = sessionStorage.getItem('adminPass');
       if (!password) {
@@ -1168,7 +1191,7 @@ Link: ${order.adUrl}
             'Authorization': `Bearer ${password}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ adId, adCopy, adUrl })
+          body: JSON.stringify({ adId, adCopy, adUrl, notes })
         });
 
         if (!response.ok) {
@@ -1178,9 +1201,24 @@ Link: ${order.adUrl}
         // Update local data
         window.orderData[adId].adCopy = adCopy;
         window.orderData[adId].adUrl = adUrl;
+        window.orderData[adId].notes = notes;
 
         // Update the table cell
-        document.getElementById(`adcopy-${adId}`).innerHTML = formatAdCopy(adCopy, adUrl);
+        const adCopyEl = document.getElementById(`adcopy-${adId}`);
+        if (adCopyEl) {
+          let html = formatAdCopy(adCopy, adUrl);
+          if (notes) {
+            html += `<div class="notes-indicator" title="${escapeHtml(notes)}">${escapeHtml(notes)}</div>`;
+          }
+          adCopyEl.innerHTML = html;
+        }
+
+        // Re-render views to show notes
+        if (window.allOrdersData) {
+          const currentOrders = currentTimeFilter === 'upcoming' ? window.allOrdersData.orders : window.allOrdersData.pastOrders;
+          renderOrdersList(currentOrders);
+          renderIssueView(currentOrders);
+        }
 
         closeEditModal();
       } catch (err) {
