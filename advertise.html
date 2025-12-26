@@ -460,6 +460,51 @@
       color: var(--green);
     }
 
+    /* Sample Ad Preview */
+    .sample-preview {
+      margin: 3rem auto 0 auto;
+      max-width: 600px;
+      padding: 0 1rem;
+    }
+
+    .sample-preview-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin-bottom: 0.75rem;
+      text-align: center;
+    }
+
+    .sample-preview img {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    /* Mobile Sticky CTA */
+    .mobile-sticky-cta {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      padding: 0.75rem 1rem;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      text-align: center;
+    }
+
+    .mobile-sticky-cta .cta-button {
+      display: inline-block;
+      width: auto;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.85rem;
+    }
+
     /* Responsive */
     @media (max-width: 700px) {
       h1 { font-size: 1.8rem; }
@@ -468,6 +513,15 @@
       .stats-row { gap: 1rem; }
       .stat { min-width: 100px; }
       .format-grid { grid-template-columns: 1fr; }
+
+      .mobile-sticky-cta {
+        display: block;
+      }
+
+      /* Add padding to footer so sticky CTA doesn't cover content */
+      footer {
+        padding-bottom: 5rem;
+      }
     }
   </style>
 </head>
@@ -479,7 +533,7 @@
       <img src="reco-logo.jpg" alt="Recomendo Logo" class="logo">
       <h1>Advertise on Recomendo</h1>
       <p class="hero-subtitle">Reach <span id="hero-subscribers">122,000+</span> engaged readers who trust our weekly recommendations.</p>
-      <p class="newsletter-desc">Recomendo is a free weekly newsletter delivered every Sunday morning. Each issue shares six brief, personally-tested recommendations of cool tools, media, ideas, and products—curated by Kevin Kelly, Mark Frauenfelder, and Claudia Dawson.</p>
+      <p class="newsletter-desc">Recomendo is a free weekly newsletter delivered every Sunday morning. Each issue shares six brief, personally-tested recommendations of cool tools, media, ideas, and products—curated by Kevin Kelly (co-founder of Wired), Mark Frauenfelder (founder of Boing Boing), and Claudia Dawson. <a href="https://recomendo.com" target="_blank" rel="noopener" style="color: var(--green);">See a recent issue →</a></p>
     </div>
 
     <!-- Pricing Cards -->
@@ -521,7 +575,21 @@
           <div class="stat-number" id="stat-openrate">46%</div>
           <div class="stat-label">Open Rate</div>
         </div>
+        <div class="stat">
+          <div class="stat-number">500</div>
+          <div class="stat-label">Issues Sent</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">9+</div>
+          <div class="stat-label">Years Running</div>
+        </div>
       </div>
+    </div>
+
+    <!-- Sample Ad Preview -->
+    <div class="sample-preview">
+      <div class="sample-preview-label">What Ads Look Like</div>
+      <img src="sample-ad-preview.jpg" alt="Sample of Premium Sponsorship and Unclassified ads in Recomendo newsletter">
     </div>
   </header>
 
@@ -585,8 +653,8 @@
             <span>Up to 280 characters, text only</span>
           </div>
           <div class="format-item">
-            <strong>Who writes it</strong>
-            <span>You provide copy; we can suggest edits</span>
+            <strong>Ad copy deadline</strong>
+            <span>Friday at noon PT (before Sunday issue)</span>
           </div>
           <div class="format-item">
             <strong>What you provide</strong>
@@ -607,8 +675,8 @@
             <span>Up to 280 characters, text only</span>
           </div>
           <div class="format-item">
-            <strong>Who writes it</strong>
-            <span>You write the copy</span>
+            <strong>Ad copy deadline</strong>
+            <span>Friday at noon PT (before Sunday issue)</span>
           </div>
           <div class="format-item">
             <strong>What you provide</strong>
@@ -663,9 +731,14 @@
   <!-- Footer -->
   <footer>
     <div class="container">
-      <p>Questions? Email <a href="mailto:editor@kk.org">editor@kk.org</a> · © 2025 <a href="https://recomendo.com" target="_blank" rel="noopener">Recomendo</a></p>
+      <p>Questions? Email <a href="mailto:editor@cool-tools.org">editor@cool-tools.org</a> · © 2025 <a href="https://recomendo.com" target="_blank" rel="noopener">Recomendo</a></p>
     </div>
   </footer>
+
+  <!-- Mobile Sticky CTA -->
+  <div class="mobile-sticky-cta">
+    <a href="booking.html" class="cta-button">Book Your Ad</a>
+  </div>
 
   <script>
     // Load config from worker and update page dynamically
