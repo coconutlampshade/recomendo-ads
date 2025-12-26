@@ -847,8 +847,17 @@
       let html = '';
       for (const ad of ads) {
         let adHtml = ad.adCopy;
+        // Convert **bold** to <b>
         adHtml = adHtml.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
-        adHtml = adHtml.replace(/\[\[(.+?)\]\]/g, `<a href="${ad.adUrl}">$1</a>`);
+
+        // Check if there's a [[link]] in the copy
+        if (adHtml.includes('[[') && adHtml.includes(']]')) {
+          adHtml = adHtml.replace(/\[\[(.+?)\]\]/g, `<a href="${ad.adUrl}">$1</a>`);
+        } else if (ad.adUrl) {
+          // No [[link]] syntax - append URL as a link at the end
+          const displayUrl = ad.adUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+          adHtml += ` <a href="${ad.adUrl}">${displayUrl}</a>`;
+        }
 
         if (ad.type === 'premium') {
           html += `<p><strong>[SPONSOR]</strong> ${adHtml}</p>\n`;
@@ -971,7 +980,15 @@
       // Format for newsletter: convert **bold** and [[link]] to HTML
       let html = order.adCopy;
       html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
-      html = html.replace(/\[\[(.+?)\]\]/g, `<a href="${order.adUrl}">$1</a>`);
+
+      // Check if there's a [[link]] in the copy
+      if (html.includes('[[') && html.includes(']]')) {
+        html = html.replace(/\[\[(.+?)\]\]/g, `<a href="${order.adUrl}">$1</a>`);
+      } else if (order.adUrl) {
+        // No [[link]] syntax - append URL as a link at the end
+        const displayUrl = order.adUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+        html += ` <a href="${order.adUrl}">${displayUrl}</a>`;
+      }
 
       // Copy as HTML to clipboard
       const blob = new Blob([html], { type: 'text/html' });
