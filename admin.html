@@ -145,6 +145,11 @@
       border-color: #f9a825;
       color: #333;
     }
+    .action-btn.email:hover {
+      background: #e3f2fd;
+      border-color: #2196f3;
+      color: #1976d2;
+    }
     .action-btn.delete:hover {
       background: #fee;
       border-color: #e74c3c;
@@ -787,6 +792,7 @@
           <td class="actions-cell">
             <button class="action-btn copy" onclick="copyAd('${order.adId}')">Copy</button>
             <button class="action-btn edit" onclick="editAd('${order.adId}')">Edit</button>
+            <button class="action-btn email" onclick="emailCustomer('${order.adId}')">Email</button>
             <button class="action-btn delete" onclick="deleteAd('${order.adId}')">Delete</button>
           </td>
         </tr>`;
@@ -866,6 +872,7 @@
                 <div class="issue-ad-actions">
                   <button class="action-btn copy" onclick="copyAd('${ad.adId}')" title="Copy">Copy</button>
                   <button class="action-btn edit" onclick="editAd('${ad.adId}')" title="Edit">Edit</button>
+                  <button class="action-btn email" onclick="emailCustomer('${ad.adId}')" title="Email">Email</button>
                 </div>
               </div>`;
         }
@@ -1083,6 +1090,30 @@
         navigator.clipboard.writeText(html);
         alert('Copied as plain text (HTML copy not supported in this browser)');
       });
+    }
+
+    // ============================================
+    // EMAIL CUSTOMER
+    // ============================================
+
+    function emailCustomer(adId) {
+      const order = window.orderData[adId];
+      if (!order) return;
+
+      const subject = `Your Recomendo Ad - Issue #${order.issueNumber}`;
+      const body = `Hi ${order.customerName},
+
+I'm writing about your Recomendo ad scheduled for Issue #${order.issueNumber} (${order.dateFormatted}).
+
+Your ad copy:
+${order.adCopy}
+
+Link: ${order.adUrl}
+
+`;
+
+      const mailto = `mailto:${order.customerEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.location.href = mailto;
     }
 
     // ============================================
