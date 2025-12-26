@@ -424,34 +424,6 @@
       background: rgba(255,255,255,0.2);
     }
 
-    /* View Toggle */
-    .view-toggle {
-      display: flex;
-      gap: 0;
-      margin-bottom: 20px;
-    }
-    .view-toggle button {
-      padding: 10px 20px;
-      border: 1px solid #ddd;
-      background: #f5f5f5;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      color: #666;
-    }
-    .view-toggle button:first-child {
-      border-radius: 4px 0 0 4px;
-    }
-    .view-toggle button:last-child {
-      border-radius: 0 4px 4px 0;
-      border-left: none;
-    }
-    .view-toggle button.active {
-      background: #8fd14f;
-      border-color: #8fd14f;
-      color: #333;
-    }
-
     /* Issue View */
     .issue-card {
       background: white;
@@ -535,12 +507,6 @@
       display: flex;
       gap: 4px;
     }
-    #listView, #issueView {
-      display: none;
-    }
-    #listView.active, #issueView.active {
-      display: block;
-    }
   </style>
 </head>
 <body>
@@ -581,26 +547,8 @@
         </button>
       </div>
 
-      <div class="view-toggle">
-        <button onclick="switchView('list')">List View</button>
-        <button class="active" onclick="switchView('issue')">Issue View</button>
-      </div>
-
-      <!-- List View -->
-      <div id="listView">
-        <div class="orders-table">
-          <h2>Ad Schedule</h2>
-          <div id="ordersContent">
-            <div class="loading">Loading orders...</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Issue View -->
-      <div id="issueView" class="active">
-        <div id="issueViewContent">
-          <div class="loading">Loading orders...</div>
-        </div>
+      <div id="issueViewContent">
+        <div class="loading">Loading orders...</div>
       </div>
 
       <!-- Site Settings -->
@@ -739,7 +687,6 @@
       buttons[filter === 'upcoming' ? 0 : 1].classList.add('active');
 
       if (window.allOrdersData) {
-        renderOrdersList(filter === 'upcoming' ? window.allOrdersData.orders : window.allOrdersData.pastOrders);
         renderIssueView(filter === 'upcoming' ? window.allOrdersData.orders : window.allOrdersData.pastOrders);
       }
     }
@@ -764,63 +711,7 @@
 
       // Render current filter
       const currentOrders = currentTimeFilter === 'upcoming' ? orders : pastOrders;
-      renderOrdersList(currentOrders);
       renderIssueView(currentOrders);
-    }
-
-    function renderOrdersList(orders) {
-      if (orders.length === 0) {
-        document.getElementById('ordersContent').innerHTML = `<div class="no-orders">No ${currentTimeFilter} ads</div>`;
-        return;
-      }
-
-      // Sort by issue date (ascending for upcoming, already descending for past)
-      if (currentTimeFilter === 'upcoming') {
-        orders.sort((a, b) => new Date(a.issueDate) - new Date(b.issueDate));
-      }
-
-      let html = `<table>
-        <thead>
-          <tr>
-            <th>Issue Date</th>
-            <th>Type</th>
-            <th>Customer</th>
-            <th>Ad Copy</th>
-            <th>Amount</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>`;
-
-      for (const order of orders) {
-        const badgeClass = order.type === 'premium' ? 'premium' : 'unclassified';
-        const typeName = order.type === 'premium' ? 'Premium' : 'Unclassified';
-
-        html += `<tr id="row-${order.adId}">
-          <td class="issue-date">
-            <strong>#${order.issueNumber}</strong><br>
-            ${order.dateFormatted}
-          </td>
-          <td><span class="badge ${badgeClass}">${typeName}</span></td>
-          <td>
-            <strong>${escapeHtml(order.customerName)}</strong><br>
-            <span style="color:#666;font-size:13px">${escapeHtml(order.customerEmail)}</span>
-          </td>
-          <td>
-            <div class="ad-copy" id="adcopy-${order.adId}">${formatAdCopy(order.adCopy, order.adUrl)}${order.notes ? `<div class="notes-indicator" title="${escapeHtml(order.notes)}">${escapeHtml(order.notes)}</div>` : ''}</div>
-          </td>
-          <td><strong>$${order.price}</strong></td>
-          <td class="actions-cell">
-            <button class="action-btn copy" onclick="copyAd('${order.adId}')">Copy</button>
-            <button class="action-btn edit" onclick="editAd('${order.adId}')">Edit</button>
-            <button class="action-btn email" onclick="emailCustomer('${order.adId}')">Email</button>
-            <button class="action-btn delete" onclick="deleteAd('${order.adId}')">Delete</button>
-          </td>
-        </tr>`;
-      }
-
-      html += '</tbody></table>';
-      document.getElementById('ordersContent').innerHTML = html;
     }
 
     function renderIssueView(orders) {
@@ -894,6 +785,7 @@
                   <button class="action-btn copy" onclick="copyAd('${ad.adId}')" title="Copy">Copy</button>
                   <button class="action-btn edit" onclick="editAd('${ad.adId}')" title="Edit">Edit</button>
                   <button class="action-btn email" onclick="emailCustomer('${ad.adId}')" title="Email">Email</button>
+                  <button class="action-btn delete" onclick="deleteAd('${ad.adId}')" title="Delete">Delete</button>
                 </div>
               </div>`;
         }
@@ -904,24 +796,6 @@
       }
 
       document.getElementById('issueViewContent').innerHTML = html;
-    }
-
-    function switchView(view) {
-      const listView = document.getElementById('listView');
-      const issueView = document.getElementById('issueView');
-      const buttons = document.querySelectorAll('.view-toggle button');
-
-      buttons.forEach(btn => btn.classList.remove('active'));
-
-      if (view === 'list') {
-        listView.classList.add('active');
-        issueView.classList.remove('active');
-        buttons[0].classList.add('active');
-      } else {
-        listView.classList.remove('active');
-        issueView.classList.add('active');
-        buttons[1].classList.add('active');
-      }
     }
 
     function copyAllForIssue(issueNumber) {
@@ -1213,10 +1087,9 @@ Link: ${order.adUrl}
           adCopyEl.innerHTML = html;
         }
 
-        // Re-render views to show notes
+        // Re-render to show updated notes
         if (window.allOrdersData) {
           const currentOrders = currentTimeFilter === 'upcoming' ? window.allOrdersData.orders : window.allOrdersData.pastOrders;
-          renderOrdersList(currentOrders);
           renderIssueView(currentOrders);
         }
 
