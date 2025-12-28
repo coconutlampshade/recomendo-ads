@@ -1,0 +1,210 @@
+<task>
+You are a senior UX copywriter and web designer using vibe coding inside Claude Code to create a  “Advertise with Recomendo” site for Recomendo.com, modeled on the Dense Discovery advertising page (https://www.densediscovery.com/advertise/) but tailored to Recomendo’s audience, metrics, and ad products.
+</task>
+
+<context>
+- Recomendo is a long-running, human-written weekly newsletter that shares six short, personal recommendations in each issue.[1]
+- The newsletter has over 120,000 subscribers and consistently high engagement; readers trust the editors and often act on their suggestions.[2][1]
+- Dense Discovery’s advertising page is a reference for tone, layout, and structure: a calm, design-forward page that clearly explains audience, ad formats, pricing, availability, and terms in a friendly, transparent voice.[3]
+- Recomendo’s audience skews toward curious, tech-comfortable readers interested in tools, apps, books, media, and life-improvement hacks, similar in spirit to DD but with its own distinct personality and editorial voice.[1][4]
+- Recomendo currently sells sponsorships and smaller “unclassified” footer ads, with performance-focused case study quotes highlighting strong CPC and subscriber acquisition performance for advertisers.[5]
+- The page will live at a URL like recomendo.com/advertise (or equivalent) and should feel cohesive with the existing Recomendo brand and Substack presence.[1]
+- The goal of the page is to:
+  - Convince relevant brands/newsletters/tools to sponsor Recomendo.
+  - Make it easy to understand the offer (audience, formats, pricing, performance).
+  - Provide a clear contact or booking mechanism (email or form).
+</context>
+
+<constraints>
+- Overall vibe:
+  - Match a calm, confident, no-hype tone; friendly but **professional**, similar to Dense Discovery’s ad page.
+  - Prioritize clarity, transparency, and credibility over persuasion tricks.
+  - Use short paragraphs and clear subheadings; scannable and mobile-friendly.
+- Content requirements:
+  - Hero section:
+    - Clear headline that states the opportunity (e.g., “Reach highly engaged readers via Recomendo”).
+    - One short supporting paragraph describing Recomendo and its audience.
+    - One primary call to action (e.g., “Request availability & rates”) with an email mailto link placeholder.
+  - “Why sponsor Recomendo?” section:
+    - Bullet list of 3–6 points describing:
+      - Audience quality and trust.
+      - Strong engagement / click performance (use qualitative claims, no fake numbers).
+      - Good fit for tools, newsletters, apps, and other high-consideration products.
+  - Audience snapshot section:
+    - Bulleted or lightly formatted stats with placeholders where exact numbers can be filled in later (e.g., “[SUBSCRIBER_COUNT]+ subscribers”, “[AVG_OPEN_RATE]% average open rate”, “[COUNTRIES] top regions”). Do not invent exact stats; use clear placeholders.
+  - Ad formats section:
+    - Describe at least two ad products:
+      - Main sponsorship: top-of-newsletter feature (title, description, example structure, and what the advertiser provides vs. what Recomendo writes).
+      - Classified / footer ad: short text-only ad with character limit and single link, mentioning that it appears near the end of the issue, similar to DD classifieds.[3][5]
+    - For each, include:
+      - Where it appears in the newsletter.
+      - Approximate word/character length.
+      - Who writes the copy (Recomendo vs advertiser) and whether editing is included.
+  - Social proof section:
+    - Include 2–3 testimonial blocks with generic but plausible placeholder quotes modeled on the style of current Recomendo advertiser reviews (performance-focused, mentioning CPC and subscriber quality, but with [PLACEHOLDER] where specific numbers would go).[5]
+    - Each should have a placeholder for company name and role (e.g., “Growth marketer at [COMPANY_NAME]”).
+  - Pricing & availability:
+    - Explain that pricing depends on issue date and demand; use placeholders like “[SPONSOR_RATE] per issue” and “[CLASSIFIED_RATE] per classified”.
+    - Emphasize that inventory is limited and often books weeks in advance.
+    - Invite readers to email for current availability and a media kit.
+  - Fit & guidelines:
+    - Brief section outlining who is a good fit (e.g., tools, newsletters, education, productivity, creative software) and what Recomendo will not accept (e.g., scams, misleading financial products, crypto, surveillance-y adtech, etc.).
+    - Stress that all sponsors must align with Recomendo’s values and be genuinely useful to readers.[4]
+  - Contact / booking:
+    - Clear call to action with:
+      - Email address placeholder like “[AD_SALES_EMAIL]”.
+      - Simple checklist of what to include in the email (company, product, URL, ideal timing, preferred format).
+- Copy & structure constraints:
+  - Write all copy as final production-ready text, with clear section headings.
+  - Use strictly neutral placeholders in ALL brackets that the user can later replace, e.g., [SUBSCRIBER_COUNT], [AVG_OPEN_RATE], [AD_SALES_EMAIL], [SPONSOR_RATE], [CLASSIFIED_RATE], [TOP_COUNTRIES], [TESTIMONIAL_1_COMPANY], etc.
+  - Do not fabricate numeric performance metrics; when referencing performance, use qualitative phrasing (e.g., “strong CPCs” or “well below typical newsletter averages”) plus placeholders for actual numbers.
+  - Avoid jargon like “funnels” and “synergies”; use straightforward language.
+  - Do not include any implementation code (no HTML/CSS/JS) in the main draft; focus purely on copy and content structure.
+- Technical constraints for vibe coding:
+  - Organize the answer into clearly labeled sections that map 1:1 to page blocks, in the order they should appear on the page.
+  - Within each section, separate “heading” vs “body” vs “bullets” so it is trivial to translate into a layout system.
+  - Make it easy to tweak later; no hidden assumptions, no references to external styles.
+  — We allow 1 Premium Sponsorship and 10 Unclassifieds in each issue.
+  - Here is an earlier version that shows colors, some APIs and other useful information: https://github.com/coconutlampshade/recomendo-ads/blob/main/index.html
+</constraints>
+
+<output_format>
+Return the code (html, css, js, etc) to make this
+
+<page_spec>
+  <section id="hero">
+    <heading>...</heading>
+    <subheading>...</subheading>
+    <body>...</body>
+    <primary_cta_label>...</primary_cta_label>
+    <primary_cta_link>[AD_SALES_EMAIL_MAILTO]</primary_cta_link>
+  </section>
+
+  <section id="why_sponsor">
+    <heading>...</heading>
+    <body>...</body>
+    <bullets>
+      <item>...</item>
+      <item>...</item>
+      <item>...</item>
+    </bullets>
+  </section>
+
+  <section id="audience">
+    <heading>...</heading>
+    <body>...</body>
+    <stats>
+      <item>[SUBSCRIBER_COUNT]+ subscribers</item>
+      <item>[AVG_OPEN_RATE]% average open rate</item>
+      <item>Top regions: [TOP_COUNTRIES]</item>
+      <item>Primary interests: tools, apps, media, and practical life upgrades</item>
+    </stats>
+  </section>
+
+  <section id="ad_formats">
+    <heading>...</heading>
+    <format id="main_sponsorship">
+      <subheading>Main sponsorship</subheading>
+      <body>...</body>
+      <details>
+        <item>Placement: ...</item>
+        <item>Length: ...</item>
+        <item>Who writes it: ...</item>
+        <item>What you provide: ...</item>
+      </details>
+    </format>
+    <format id="classified">
+      <subheading>Classified / footer ad</subheading>
+      <body>...</body>
+      <details>
+        <item>Placement: ...</item>
+        <item>Length: ...</item>
+        <item>Who writes it: ...</item>
+        <item>What you provide: ...</item>
+      </details>
+    </format>
+  </section>
+
+  <section id="social_proof">
+    <heading>...</heading>
+    <testimonials>
+      <testimonial>
+        <quote>“...”</quote>
+        <attribution>[TESTIMONIAL_1_NAME], [TESTIMONIAL_1_ROLE] at [TESTIMONIAL_1_COMPANY]</attribution>
+      </testimonial>
+      <testimonial>
+        <quote>“...”</quote>
+        <attribution>[TESTIMONIAL_2_NAME], [TESTIMONIAL_2_ROLE] at [TESTIMONIAL_2_COMPANY]</attribution>
+      </testimonial>
+      <testimonial>
+        <quote>“...”</quote>
+        <attribution>[TESTIMONIAL_3_NAME], [TESTIMONIAL_3_ROLE] at [TESTIMONIAL_3_COMPANY]</attribution>
+      </testimonial>
+    </testimonials>
+  </section>
+
+  <section id="pricing_availability">
+    <heading>...</heading>
+    <body>...</body>
+    <bullets>
+      <item>Main sponsorship: from [SPONSOR_RATE] per issue (varies by date and demand)</item>
+      <item>Classified / footer ad: from [CLASSIFIED_RATE] per issue</item>
+      <item>Limited inventory; popular weeks often book out in advance.</item>
+      <item>Media kit and current availability available on request.</item>
+    </bullets>
+  </section>
+
+  <section id="fit_guidelines">
+    <heading>...</heading>
+    <body>...</body>
+    <good_fit>
+      <item>Thoughtful tools and apps</item>
+      <item>Newsletters and media with a similar audience</item>
+      <item>Education, courses, and workshops</item>
+      <item>Productivity, creativity, and research tools</item>
+    </good_fit>
+    <not_a_fit>
+      <item>Get-rich-quick schemes or misleading financial products</item>
+      <item>Crypto, gambling, or high-risk speculative products</item>
+      <item>Surveillance-heavy adtech or invasive tracking tools</item>
+      <item>Anything that conflicts with Recomendo’s values or reader trust</item>
+    </not_a_fit>
+  </section>
+
+  <section id="contact">
+    <heading>...</heading>
+    <body>...</body>
+    <bullets>
+      <item>Company and product name</item>
+      <item>Link to what you would like to promote</item>
+      <item>Preferred dates or timing</item>
+      <item>Which format(s) you are interested in (sponsorship, classified, or both)</item>
+      <item>Any relevant audience or performance goals</item>
+    </bullets>
+    <primary_cta_label>Email us for availability & rates</primary_cta_label>
+    <primary_cta_link>[AD_SALES_EMAIL_MAILTO]</primary_cta_link>
+  </section>
+</page_spec>
+</output_format>
+
+[1](https://www.recomendo.com)
+[2](https://www.perplexity.ai/search/e65228c0-8516-469f-bcb4-f451f6e78d3c)
+[3](https://www.densediscovery.com/advertise/)
+[4](https://www.recomendo.com/p/personal-info-auditfree-audio-transcriptionthan)
+[5](https://recomendo-ads.pages.dev)
+[6](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/use-xml-tags)
+[7](https://www.reddit.com/r/ClaudeAI/comments/1ldylsc/learn_to_use_structured_xml_prompts_for_claude/)
+[8](https://www.youtube.com/watch?v=SKBDC3QugZw)
+[9](https://www.facebook.com/groups/DeepNetGroup/posts/2581058938953639/)
+[10](https://www.linkedin.com/posts/daviscon_how-to-write-prompts-for-claude-using-xml-activity-7369314384512233477-haSt)
+[11](https://www.marketermilk.com/blog/newsletter-landing-page)
+[12](https://www.youtube.com/watch?v=Me1ekYtu-l8&vl=en-US)
+[13](https://campaignrefinery.com/newsletter-advertising-guide/)
+[14](https://reletter.com/publications/recomendo)
+[15](https://www.optimizepress.com/newsletter-landing-page-examples/)
+[16](https://www.reddit.com/r/vibecoding/comments/1o6882d/use_this_prompt_structure_and_you_nailed_it/)
+[17](https://www.densediscovery.com/advertise/terms.php)
+[18](https://unbounce.com/landing-page-examples/best-landing-page-examples/)
+[19](https://www.reddit.com/r/ClaudeAI/comments/1ljesg7/vibe_planning_get_the_most_out_of_claude_code/)
+[20](https://emailoctopus.com/blog/how-to-get-sponsors-for-your-newsletter)
+[21](https://www.beehiiv.com/blog/newsletter-landing-page-examples)

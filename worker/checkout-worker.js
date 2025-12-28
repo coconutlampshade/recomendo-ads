@@ -88,6 +88,14 @@ export default {
       return new Response(JSON.stringify(edits), { headers: corsHeaders() });
     }
 
+    if (url.pathname === '/admin/backup' && request.method === 'GET') {
+      return handleBackup(request, env);
+    }
+
+    if (url.pathname === '/admin/send-report' && request.method === 'POST') {
+      return handleSendReport(request, env);
+    }
+
     if (url.pathname === '/config') {
       return handleGetConfig(request, env);
     }
@@ -253,8 +261,20 @@ async function handleWebhook(request, env) {
       // Send notification email
       await sendNotificationEmail(env, orderData, session);
 
-      // Clean up KV
+      // Save completed order permanently for backup
       if (env.ORDERS_KV) {
+        const completedOrder = {
+          ...orderData,
+          sessionId: session.id,
+          paymentIntent: session.payment_intent,
+          amountTotal: session.amount_total,
+          completedAt: new Date().toISOString()
+        };
+        await env.ORDERS_KV.put(
+          `completed_${session.id}`,
+          JSON.stringify(completedOrder)
+        );
+        // Clean up temporary order
         await env.ORDERS_KV.delete(`order_${session.id}`);
       }
 
@@ -600,6 +620,9 @@ async function handleAdminOrders(request, env) {
     // Get edited ads
     const editedAds = await getEditedAds(env);
 
+    // Get sent reports
+    const sentReports = await getSentReports(env);
+
     for (const session of data.data) {
       if (session.payment_status !== 'paid') continue;
 
@@ -638,6 +661,9 @@ async function handleAdminOrders(request, env) {
         const adUrl = edit?.adUrl || item.adUrl || '';
         const notes = edit?.notes || '';
 
+        // Check report status
+        const reportSent = sentReports[adId];
+
         orders.push({
           adId,
           sessionId: session.id,
@@ -653,7 +679,9 @@ async function handleAdminOrders(request, env) {
           notes,
           price: item.price || 0,
           paidAt: new Date(session.created * 1000).toISOString(),
-          edited: !!edit
+          edited: !!edit,
+          reportSent: !!reportSent,
+          reportData: reportSent || null
         });
       }
     }
@@ -977,6 +1005,74 @@ async function handleGetConfig(request, env) {
 }
 
 /**
+ * Export all backup data (admin only)
+ * Returns all completed orders, edited ads, cancelled ads, and site config
+ */
+async function handleBackup(request, env) {
+  if (request.method === 'OPTIONS') {
+    return handleCors();
+  }
+
+  // Check authorization
+  const authHeader = request.headers.get('Authorization');
+  const password = authHeader?.replace('Bearer ', '');
+
+  if (!password || password !== env.ADMIN_PASSWORD) {
+    return new Response('Unauthorized', {
+      status: 401,
+      headers: corsHeaders()
+    });
+  }
+
+  try {
+    const backup = {
+      exportedAt: new Date().toISOString(),
+      completedOrders: [],
+      cancelledAds: [],
+      editedAds: {},
+      siteConfig: null
+    };
+
+    if (env.ORDERS_KV) {
+      // Get all completed orders from KV
+      const ordersList = await env.ORDERS_KV.list({ prefix: 'completed_' });
+      for (const key of ordersList.keys) {
+        const orderData = await env.ORDERS_KV.get(key.name);
+        if (orderData) {
+          backup.completedOrders.push(JSON.parse(orderData));
+        }
+      }
+
+      // Get cancelled ads
+      const cancelledJson = await env.ORDERS_KV.get('cancelled_ads');
+      backup.cancelledAds = cancelledJson ? JSON.parse(cancelledJson) : [];
+
+      // Get edited ads
+      const editsJson = await env.ORDERS_KV.get('edited_ads');
+      backup.editedAds = editsJson ? JSON.parse(editsJson) : {};
+
+      // Get site config
+      const configJson = await env.ORDERS_KV.get('site_config');
+      backup.siteConfig = configJson ? JSON.parse(configJson) : DEFAULT_CONFIG;
+    }
+
+    return new Response(JSON.stringify(backup, null, 2), {
+      headers: {
+        ...corsHeaders(),
+        'Content-Disposition': `attachment; filename="recomendo-backup-${new Date().toISOString().split('T')[0]}.json"`
+      }
+    });
+
+  } catch (error) {
+    console.error('Backup error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to create backup' }), {
+      status: 500,
+      headers: corsHeaders()
+    });
+  }
+}
+
+/**
  * Update site config (admin only)
  */
 async function handleUpdateConfig(request, env) {
@@ -1023,6 +1119,144 @@ async function handleUpdateConfig(request, env) {
   } catch (error) {
     console.error('Update config error:', error);
     return new Response(JSON.stringify({ error: 'Failed to update config' }), {
+      status: 500,
+      headers: corsHeaders()
+    });
+  }
+}
+
+/**
+ * Get list of ads that have had reports sent
+ */
+async function getSentReports(env) {
+  if (!env.ORDERS_KV) return {};
+  const reportsJson = await env.ORDERS_KV.get('sent_reports');
+  return reportsJson ? JSON.parse(reportsJson) : {};
+}
+
+/**
+ * Mark a report as sent
+ */
+async function markReportSent(env, adId, reportData) {
+  if (!env.ORDERS_KV) return;
+  const reports = await getSentReports(env);
+  reports[adId] = {
+    ...reportData,
+    sentAt: new Date().toISOString()
+  };
+  await env.ORDERS_KV.put('sent_reports', JSON.stringify(reports));
+}
+
+/**
+ * Send performance report email to advertiser
+ */
+async function handleSendReport(request, env) {
+  if (request.method === 'OPTIONS') {
+    return handleCors();
+  }
+
+  // Check authorization
+  const authHeader = request.headers.get('Authorization');
+  const password = authHeader?.replace('Bearer ', '');
+
+  if (!password || password !== env.ADMIN_PASSWORD) {
+    return new Response('Unauthorized', {
+      status: 401,
+      headers: corsHeaders()
+    });
+  }
+
+  try {
+    const { adId, customerName, customerEmail, issueNumber, dateFormatted, adType, clicks, openRate } = await request.json();
+
+    if (!adId || !customerEmail || !clicks) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+        status: 400,
+        headers: corsHeaders()
+      });
+    }
+
+    const typeName = adType === 'premium' ? 'Premium Sponsorship' : 'Unclassified Ad';
+
+    // Build the report email HTML
+    const reportHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;">
+  <div style="max-width:600px;margin:0 auto;padding:20px;">
+    <div style="background:#8fd14f;padding:24px;border-radius:8px 8px 0 0;text-align:center;">
+      <h1 style="margin:0;color:#181818;font-size:24px;">Your Ad Performance Report</h1>
+      <p style="margin:8px 0 0;color:#181818;">Issue #${issueNumber} · ${dateFormatted}</p>
+    </div>
+
+    <div style="background:white;padding:32px;border-radius:0 0 8px 8px;">
+      <p style="margin:0 0 24px;color:#555;font-size:16px;">Hi ${escapeHtml(customerName)},</p>
+
+      <p style="margin:0 0 24px;color:#555;font-size:16px;">Here are the results from your ${typeName} in Recomendo Issue #${issueNumber}:</p>
+
+      <div style="background:#f7f9fa;border-radius:12px;padding:24px;margin-bottom:24px;text-align:center;">
+        <div style="display:inline-block;margin:0 20px;">
+          <div style="font-size:48px;font-weight:700;color:#8fd14f;line-height:1;">${clicks}</div>
+          <div style="font-size:14px;color:#666;margin-top:4px;">Link Clicks</div>
+        </div>
+        <div style="display:inline-block;margin:0 20px;">
+          <div style="font-size:48px;font-weight:700;color:#181818;line-height:1;">${openRate}%</div>
+          <div style="font-size:14px;color:#666;margin-top:4px;">Open Rate</div>
+        </div>
+      </div>
+
+      <p style="margin:0 0 24px;color:#555;font-size:16px;">Thank you for advertising with Recomendo! We hope you saw great results from your campaign.</p>
+
+      <div style="text-align:center;margin:32px 0;">
+        <a href="https://recomendo-ads.pages.dev/booking.html" style="display:inline-block;background:#8fd14f;color:#181818;padding:14px 28px;border-radius:30px;text-decoration:none;font-weight:700;font-size:16px;">Book Another Ad</a>
+      </div>
+
+      <p style="margin:24px 0 0;color:#888;font-size:14px;text-align:center;">Questions? Just reply to this email.</p>
+    </div>
+
+    <div style="text-align:center;padding:16px;color:#888;font-size:13px;">
+      <span style="color:#8fd14f;font-weight:600;">Recomendo</span> · Trusted recommendations since 2016
+    </div>
+  </div>
+</body>
+</html>`;
+
+    // Send the report email
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Recomendo <ads@recommendo.org>',
+        to: customerEmail,
+        reply_to: env.NOTIFICATION_EMAIL || 'editor@cool-tools.org',
+        subject: `Your Recomendo Ad Results: ${clicks} clicks — Issue #${issueNumber}`,
+        html: reportHtml,
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('Report email send failed:', error);
+      throw new Error(`Failed to send email: ${error}`);
+    }
+
+    // Mark report as sent
+    await markReportSent(env, adId, { clicks, openRate, customerEmail });
+
+    return new Response(JSON.stringify({ success: true }), {
+      headers: corsHeaders()
+    });
+
+  } catch (error) {
+    console.error('Send report error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to send report' }), {
       status: 500,
       headers: corsHeaders()
     });

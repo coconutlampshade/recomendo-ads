@@ -423,6 +423,68 @@
     .time-filter button.active .count {
       background: rgba(255,255,255,0.2);
     }
+    .time-filter button.needs-report {
+      border-color: #f39c12;
+      color: #f39c12;
+    }
+    .time-filter button.needs-report.active {
+      background: #f39c12;
+      border-color: #f39c12;
+      color: white;
+    }
+
+    /* Report Modal */
+    .report-preview {
+      background: #f9f9f9;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .report-preview h4 {
+      margin: 0 0 8px 0;
+      font-size: 13px;
+      color: #888;
+      text-transform: uppercase;
+    }
+    .report-stats {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 12px;
+    }
+    .report-stat {
+      text-align: center;
+    }
+    .report-stat .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #8fd14f;
+    }
+    .report-stat .label {
+      font-size: 12px;
+      color: #666;
+    }
+    .report-recipient {
+      font-size: 13px;
+      color: #666;
+    }
+    .modal-btn.send {
+      background: #f39c12;
+      border: none;
+      color: white;
+    }
+    .modal-btn.send:hover {
+      background: #e67e22;
+    }
+    .report-sent-badge {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-left: 6px;
+    }
 
     /* Issue View */
     .issue-card {
@@ -545,6 +607,9 @@
         <button onclick="switchTimeFilter('past')">
           Past <span class="count" id="pastCount">0</span>
         </button>
+        <button class="needs-report" onclick="switchTimeFilter('needsReport')">
+          Needs Report <span class="count" id="needsReportCount">0</span>
+        </button>
       </div>
 
       <div id="issueViewContent">
@@ -624,6 +689,59 @@
         </div>
       </div>
     </div>
+
+    <!-- Report Modal -->
+    <div class="modal-overlay" id="reportModal">
+      <div class="modal">
+        <h3>Send Performance Report</h3>
+        <input type="hidden" id="report-adId">
+        <input type="hidden" id="report-customerName">
+        <input type="hidden" id="report-customerEmail">
+        <input type="hidden" id="report-issueNumber">
+        <input type="hidden" id="report-dateFormatted">
+        <input type="hidden" id="report-adType">
+
+        <p style="color:#666;margin:0 0 16px;">Enter the performance stats from Substack for this ad:</p>
+
+        <div class="form-group">
+          <label>Ad Details</label>
+          <div id="report-adInfo" style="background:#f5f5f5;padding:12px;border-radius:4px;font-size:14px;"></div>
+        </div>
+
+        <div style="display:flex;gap:16px;">
+          <div class="form-group" style="flex:1">
+            <label>Link Clicks <span style="color:#e74c3c;">*</span></label>
+            <input type="number" id="report-clicks" placeholder="e.g. 342" min="0" oninput="updateReportPreview()">
+          </div>
+          <div class="form-group" style="flex:1">
+            <label>Open Rate %</label>
+            <input type="number" id="report-openRate" placeholder="e.g. 46" min="0" max="100" value="46" oninput="updateReportPreview()">
+          </div>
+        </div>
+
+        <div class="report-preview">
+          <h4>Email Preview</h4>
+          <div class="report-stats">
+            <div class="report-stat">
+              <div class="value" id="preview-clicks">—</div>
+              <div class="label">Link Clicks</div>
+            </div>
+            <div class="report-stat">
+              <div class="value" id="preview-openRate">46%</div>
+              <div class="label">Open Rate</div>
+            </div>
+          </div>
+          <div class="report-recipient">
+            To: <strong id="preview-recipient"></strong>
+          </div>
+        </div>
+
+        <div class="modal-buttons">
+          <button class="modal-btn cancel" onclick="closeReportModal()">Cancel</button>
+          <button class="modal-btn send" onclick="sendReport()" id="sendReportBtn">Send Report</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -684,10 +802,23 @@
       currentTimeFilter = filter;
       const buttons = document.querySelectorAll('.time-filter button');
       buttons.forEach(btn => btn.classList.remove('active'));
-      buttons[filter === 'upcoming' ? 0 : 1].classList.add('active');
+
+      if (filter === 'upcoming') {
+        buttons[0].classList.add('active');
+      } else if (filter === 'past') {
+        buttons[1].classList.add('active');
+      } else if (filter === 'needsReport') {
+        buttons[2].classList.add('active');
+      }
 
       if (window.allOrdersData) {
-        renderIssueView(filter === 'upcoming' ? window.allOrdersData.orders : window.allOrdersData.pastOrders);
+        if (filter === 'upcoming') {
+          renderIssueView(window.allOrdersData.orders);
+        } else if (filter === 'past') {
+          renderIssueView(window.allOrdersData.pastOrders);
+        } else if (filter === 'needsReport') {
+          renderIssueView(window.allOrdersData.needsReportOrders, true);
+        }
       }
     }
 
@@ -699,9 +830,27 @@
       document.getElementById('totalRevenue').textContent = '$' + stats.totalRevenue.toLocaleString();
       document.getElementById('upcomingAds').textContent = stats.upcomingAds;
 
+      // Calculate ads that need reports (7+ days old, report not sent)
+      const now = new Date();
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const needsReportOrders = pastOrders.filter(order => {
+        if (order.reportSent) return false;
+        if (!order.issueDate) return false;
+        try {
+          const issueDate = new Date(order.issueDate);
+          return issueDate <= sevenDaysAgo;
+        } catch {
+          return false;
+        }
+      });
+
+      // Store needs report orders
+      data.needsReportOrders = needsReportOrders;
+
       // Update time filter counts
       document.getElementById('upcomingCount').textContent = orders.length;
       document.getElementById('pastCount').textContent = pastOrders.length;
+      document.getElementById('needsReportCount').textContent = needsReportOrders.length;
 
       // Store all order data for copy/edit
       window.orderData = window.orderData || {};
@@ -710,13 +859,21 @@
       }
 
       // Render current filter
-      const currentOrders = currentTimeFilter === 'upcoming' ? orders : pastOrders;
-      renderIssueView(currentOrders);
+      if (currentTimeFilter === 'upcoming') {
+        renderIssueView(orders);
+      } else if (currentTimeFilter === 'past') {
+        renderIssueView(pastOrders);
+      } else if (currentTimeFilter === 'needsReport') {
+        renderIssueView(needsReportOrders, true);
+      }
     }
 
-    function renderIssueView(orders) {
+    function renderIssueView(orders, showReportButton = false) {
       if (orders.length === 0) {
-        document.getElementById('issueViewContent').innerHTML = `<div class="no-orders">No ${currentTimeFilter} ads</div>`;
+        const message = currentTimeFilter === 'needsReport'
+          ? 'No ads need reports right now'
+          : `No ${currentTimeFilter} ads`;
+        document.getElementById('issueViewContent').innerHTML = `<div class="no-orders">${message}</div>`;
         return;
       }
 
@@ -774,13 +931,23 @@
           const badgeClass = ad.type === 'premium' ? 'premium' : 'unclassified';
           const typeName = ad.type === 'premium' ? 'Premium' : 'Unclassified';
 
+          // Build report button/badge
+          let reportHtml = '';
+          if (showReportButton) {
+            if (ad.reportSent) {
+              reportHtml = `<span class="report-sent-badge">Report Sent</span>`;
+            } else {
+              reportHtml = `<button class="action-btn" style="background:#f39c12;color:white;border-color:#f39c12;" onclick="openReportModal('${ad.adId}')" title="Send Report">Send Report</button>`;
+            }
+          }
+
           html += `
               <div class="issue-ad-item">
                 <div class="issue-ad-type">
                   <span class="badge ${badgeClass}">${typeName}</span>
                 </div>
                 <div class="issue-ad-content">${formatAdCopy(ad.adCopy, ad.adUrl)}${ad.notes ? `<div class="notes-indicator" title="${escapeHtml(ad.notes)}">${escapeHtml(ad.notes)}</div>` : ''}</div>
-                <div class="issue-ad-customer">${escapeHtml(ad.customerName)}</div>
+                <div class="issue-ad-customer">${escapeHtml(ad.customerName)}${reportHtml}</div>
                 <div class="issue-ad-actions">
                   <button class="action-btn copy" onclick="copyAd('${ad.adId}')" title="Copy">Copy</button>
                   <button class="action-btn edit" onclick="editAd('${ad.adId}')" title="Edit">Edit</button>
@@ -1106,6 +1273,132 @@ Link: ${order.adUrl}
     // Close modal on overlay click
     document.getElementById('editModal').addEventListener('click', function(e) {
       if (e.target === this) closeEditModal();
+    });
+
+    // ============================================
+    // REPORT MODAL
+    // ============================================
+
+    function openReportModal(adId) {
+      const order = window.orderData[adId];
+      if (!order) return;
+
+      // Populate hidden fields
+      document.getElementById('report-adId').value = adId;
+      document.getElementById('report-customerName').value = order.customerName;
+      document.getElementById('report-customerEmail').value = order.customerEmail;
+      document.getElementById('report-issueNumber').value = order.issueNumber;
+      document.getElementById('report-dateFormatted').value = order.dateFormatted;
+      document.getElementById('report-adType').value = order.type;
+
+      // Clear and set defaults
+      document.getElementById('report-clicks').value = '';
+      document.getElementById('report-openRate').value = '46';
+
+      // Show ad info
+      const typeName = order.type === 'premium' ? 'Premium Sponsorship' : 'Unclassified Ad';
+      document.getElementById('report-adInfo').innerHTML = `
+        <strong>${typeName}</strong> · Issue #${order.issueNumber}<br>
+        <span style="color:#666">${order.dateFormatted}</span>
+      `;
+
+      // Update preview
+      document.getElementById('preview-recipient').textContent = order.customerEmail;
+      updateReportPreview();
+
+      // Show modal
+      document.getElementById('reportModal').classList.add('visible');
+
+      // Focus clicks input
+      setTimeout(() => document.getElementById('report-clicks').focus(), 100);
+    }
+
+    function closeReportModal() {
+      document.getElementById('reportModal').classList.remove('visible');
+    }
+
+    function updateReportPreview() {
+      const clicks = document.getElementById('report-clicks').value;
+      const openRate = document.getElementById('report-openRate').value;
+
+      document.getElementById('preview-clicks').textContent = clicks || '—';
+      document.getElementById('preview-openRate').textContent = (openRate || '46') + '%';
+    }
+
+    async function sendReport() {
+      const adId = document.getElementById('report-adId').value;
+      const clicks = document.getElementById('report-clicks').value;
+      const openRate = document.getElementById('report-openRate').value || '46';
+
+      if (!clicks) {
+        alert('Please enter the number of clicks');
+        document.getElementById('report-clicks').focus();
+        return;
+      }
+
+      const password = sessionStorage.getItem('adminPass');
+      if (!password) {
+        alert('Please log in again');
+        return;
+      }
+
+      const btn = document.getElementById('sendReportBtn');
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      try {
+        const response = await fetch(`${WORKER_URL}/admin/send-report`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${password}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            adId,
+            customerName: document.getElementById('report-customerName').value,
+            customerEmail: document.getElementById('report-customerEmail').value,
+            issueNumber: document.getElementById('report-issueNumber').value,
+            dateFormatted: document.getElementById('report-dateFormatted').value,
+            adType: document.getElementById('report-adType').value,
+            clicks: parseInt(clicks),
+            openRate: parseInt(openRate)
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to send report');
+        }
+
+        // Update local data
+        window.orderData[adId].reportSent = true;
+        window.orderData[adId].reportData = { clicks, openRate, sentAt: new Date().toISOString() };
+
+        // Update needs report count
+        const countEl = document.getElementById('needsReportCount');
+        const currentCount = parseInt(countEl.textContent) || 0;
+        countEl.textContent = Math.max(0, currentCount - 1);
+
+        // Re-render if on needs report tab
+        if (currentTimeFilter === 'needsReport' && window.allOrdersData) {
+          window.allOrdersData.needsReportOrders = window.allOrdersData.needsReportOrders.filter(o => o.adId !== adId);
+          renderIssueView(window.allOrdersData.needsReportOrders, true);
+        }
+
+        closeReportModal();
+        alert('Report sent successfully!');
+
+      } catch (err) {
+        alert('Failed to send report. Please try again.');
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send Report';
+      }
+    }
+
+    // Close report modal on overlay click
+    document.getElementById('reportModal').addEventListener('click', function(e) {
+      if (e.target === this) closeReportModal();
     });
 
     // ============================================
