@@ -921,10 +921,13 @@
     }
 
     function updatePreview(index) {
+      alert('updatePreview called with index: ' + index);
       try {
         const adCopyEl = document.getElementById('adCopy_' + index);
         const adUrlEl = document.getElementById('adUrl_' + index);
         const previewEl = document.getElementById('preview_' + index);
+
+        alert('Elements found: adCopy=' + !!adCopyEl + ', adUrl=' + !!adUrlEl + ', preview=' + !!previewEl);
 
         if (!adCopyEl || !previewEl) {
           console.error('Preview elements not found for index:', index);
