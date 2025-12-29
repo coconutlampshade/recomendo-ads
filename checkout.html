@@ -921,26 +921,18 @@
     }
 
     function updatePreview(index) {
-      alert('updatePreview called with index: ' + index);
       try {
         const adCopyEl = document.getElementById('adCopy_' + index);
         const adUrlEl = document.getElementById('adUrl_' + index);
         const previewEl = document.getElementById('preview_' + index);
 
-        alert('Elements found: adCopy=' + !!adCopyEl + ', adUrl=' + !!adUrlEl + ', preview=' + !!previewEl);
-
-        if (!adCopyEl || !previewEl) {
-          console.error('Preview elements not found for index:', index);
-          return;
-        }
+        if (!adCopyEl || !previewEl) return;
 
         const adCopy = adCopyEl.value;
         const adUrl = adUrlEl ? adUrlEl.value.trim() : '';
 
-        alert('adCopy value: ' + adCopy);
-
         if (!adCopy.trim()) {
-          previewEl.innerHTML = '<span class="placeholder-text">Your formatted ad will appear here as you type...</span>';
+          previewEl.innerHTML = '<span style="color:#bbb;font-style:italic;">Your formatted ad will appear here as you type...</span>';
           return;
         }
 
@@ -953,17 +945,13 @@
         // Replace [[text]] with link
         if (adUrl) {
           var safeUrl = adUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-          escaped = escaped.replace(/\[\[(.+?)\]\]/g, '<a href="' + safeUrl + '" class="ad-link" target="_blank">$1</a>');
+          escaped = escaped.replace(/\[\[(.+?)\]\]/g, '<a href="' + safeUrl + '" style="color:#8fd14f;text-decoration:underline;">$1</a>');
         } else {
-          escaped = escaped.replace(/\[\[(.+?)\]\]/g, '<span class="ad-link">$1</span>');
+          escaped = escaped.replace(/\[\[(.+?)\]\]/g, '<span style="color:#8fd14f;text-decoration:underline;">$1</span>');
         }
 
-        alert('Final HTML: ' + escaped);
-
-        // Build the preview HTML
-        previewEl.innerHTML = '<span class="ad-text">' + escaped + '</span>';
-
-        alert('innerHTML set, previewEl.innerHTML is now: ' + previewEl.innerHTML);
+        // Build the preview HTML with inline styles
+        previewEl.innerHTML = '<span style="color:#333;">' + escaped + '</span>';
       } catch (err) {
         console.error('Preview error:', err);
       }
