@@ -921,41 +921,43 @@
     }
 
     function updatePreview(index) {
-      const adCopy = document.getElementById(`adCopy_${index}`).value;
-      const adUrl = document.getElementById(`adUrl_${index}`).value.trim();
-      const previewEl = document.getElementById(`preview_${index}`);
+      try {
+        const adCopyEl = document.getElementById('adCopy_' + index);
+        const adUrlEl = document.getElementById('adUrl_' + index);
+        const previewEl = document.getElementById('preview_' + index);
 
-      if (!adCopy.trim()) {
-        previewEl.innerHTML = '<span class="placeholder-text">Your formatted ad will appear here as you type...</span>';
-        return;
-      }
+        if (!adCopyEl || !previewEl) {
+          console.error('Preview elements not found for index:', index);
+          return;
+        }
 
-      // Escape HTML to prevent XSS
-      function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-      }
+        const adCopy = adCopyEl.value;
+        const adUrl = adUrlEl ? adUrlEl.value.trim() : '';
 
-      // Format the ad copy with **bold** and [[links]]
-      function formatText(text, url) {
-        let escaped = escapeHtml(text);
+        if (!adCopy.trim()) {
+          previewEl.innerHTML = '<span class="placeholder-text">Your formatted ad will appear here as you type...</span>';
+          return;
+        }
+
+        // Escape HTML to prevent XSS
+        var escaped = adCopy.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
         // Replace **text** with <strong>text</strong>
         escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        // Replace [[text]] with link (use URL if provided, otherwise just style it)
-        if (url) {
-          escaped = escaped.replace(/\[\[(.+?)\]\]/g, '<a href="' + escapeHtml(url) + '" class="ad-link" target="_blank">$1</a>');
+
+        // Replace [[text]] with link
+        if (adUrl) {
+          var safeUrl = adUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+          escaped = escaped.replace(/\[\[(.+?)\]\]/g, '<a href="' + safeUrl + '" class="ad-link" target="_blank">$1</a>');
         } else {
           escaped = escaped.replace(/\[\[(.+?)\]\]/g, '<span class="ad-link">$1</span>');
         }
-        return escaped;
+
+        // Build the preview HTML
+        previewEl.innerHTML = '<span class="ad-text">' + escaped + '</span>';
+      } catch (err) {
+        console.error('Preview error:', err);
       }
-
-      // Format the ad copy
-      let formattedCopy = formatText(adCopy, adUrl);
-
-      // Build the preview HTML
-      previewEl.innerHTML = `<span class="ad-text">${formattedCopy}</span>`;
     }
 
     function normalizeUrl(input) {
