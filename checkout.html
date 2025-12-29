@@ -937,6 +937,8 @@
         const adCopy = adCopyEl.value;
         const adUrl = adUrlEl ? adUrlEl.value.trim() : '';
 
+        alert('adCopy value: ' + adCopy);
+
         if (!adCopy.trim()) {
           previewEl.innerHTML = '<span class="placeholder-text">Your formatted ad will appear here as you type...</span>';
           return;
@@ -956,8 +958,12 @@
           escaped = escaped.replace(/\[\[(.+?)\]\]/g, '<span class="ad-link">$1</span>');
         }
 
+        alert('Final HTML: ' + escaped);
+
         // Build the preview HTML
         previewEl.innerHTML = '<span class="ad-text">' + escaped + '</span>';
+
+        alert('innerHTML set, previewEl.innerHTML is now: ' + previewEl.innerHTML);
       } catch (err) {
         console.error('Preview error:', err);
       }
