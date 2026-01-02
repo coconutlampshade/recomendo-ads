@@ -1443,11 +1443,11 @@ Link: ${order.adUrl}
           <button class="remove-btn" onclick="removeTestimonial(${i})">&times;</button>
           <div class="config-field" style="margin-bottom:12px">
             <label>Quote</label>
-            <textarea id="testimonial-quote-${i}" onchange="updateTestimonial(${i})">${escapeHtml(t.quote)}</textarea>
+            <textarea id="testimonial-quote-${i}" oninput="updateTestimonial(${i})">${escapeHtml(t.quote)}</textarea>
           </div>
           <div class="config-field">
             <label>Company</label>
-            <input type="text" id="testimonial-company-${i}" value="${escapeHtml(t.company)}" onchange="updateTestimonial(${i})">
+            <input type="text" id="testimonial-company-${i}" value="${escapeHtml(t.company)}" oninput="updateTestimonial(${i})">
           </div>
         </div>
       `).join('');
