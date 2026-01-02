@@ -1479,6 +1479,11 @@ Link: ${order.adUrl}
         return;
       }
 
+      if (!currentConfig) {
+        alert('Config not loaded yet. Please refresh and try again.');
+        return;
+      }
+
       // Gather form data
       const config = {
         stats: {
@@ -1509,7 +1514,9 @@ Link: ${order.adUrl}
         });
 
         if (!response.ok) {
-          throw new Error('Failed to save');
+          const errorText = await response.text();
+          console.error('Save failed:', response.status, errorText);
+          throw new Error(`Failed to save: ${response.status}`);
         }
 
         currentConfig = config;
@@ -1519,7 +1526,7 @@ Link: ${order.adUrl}
 
       } catch (err) {
         console.error('Save error:', err);
-        status.textContent = 'Failed to save';
+        status.textContent = err.message || 'Failed to save';
         status.className = 'save-status error';
       } finally {
         btn.disabled = false;
