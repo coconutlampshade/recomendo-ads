@@ -215,10 +215,10 @@ async function handleCreateCheckout(request, env) {
         // Store full order as JSON (will be truncated if too long)
         order_data: JSON.stringify(items).substring(0, 500),
       },
-      // Store full order data in payment intent metadata too
+      // Store full order data in payment intent metadata too (truncated to 500 chars)
       payment_intent_data: {
         metadata: {
-          full_order: JSON.stringify({ name, email, company, items }),
+          full_order: JSON.stringify({ name, email, company, items }).substring(0, 500),
         }
       }
     });
