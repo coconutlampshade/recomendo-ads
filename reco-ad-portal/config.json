@@ -1,0 +1,31 @@
+{
+  "stats": {
+    "subscribers": "122,000+",
+    "openRate": "46%"
+  },
+  "pricing": {
+    "premium": 500,
+    "unclassified": 200
+  },
+  "contact": {
+    "email": "editor@kk.org"
+  },
+  "testimonials": [
+    {
+      "quote": "This placement generated nearly 1,000 clicks, which is 5x more than the estimated amount of clicks. Those clicks yielded over 105 subscribers.",
+      "company": "Brad's Deals"
+    },
+    {
+      "quote": "We ran a sponsorship with Recomendo. It ran very smoothly, and we liked the quality of the newsletter. We also got the amount of clicks expected, which worked out to around $1 a click.",
+      "company": "Growth HQ"
+    },
+    {
+      "quote": "We've received six signups from this sponsorship and one of them already turned into a customer!",
+      "company": "Gerger LLC"
+    },
+    {
+      "quote": "We saw 39,512 opens, a 49% open rate, and 233 clicks from this sponsorship with Recomendo. Even though there are no conversions, we are very happy with the performance for the rate and subscriber count.",
+      "company": "Resortpass"
+    }
+  ]
+}

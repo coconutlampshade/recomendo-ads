@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advertise with Recomendo</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --yellow: #ffe600;
+      --green: #8fd14f;
+      --black: #181818;
+      --white: #fff;
+      --gray: #f7f9fa;
+      --border: #e0e6d9;
+    }
+
+    html { box-sizing: border-box; }
+    *, *:before, *:after { box-sizing: inherit; }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: var(--gray);
+      color: var(--black);
+      margin: 0;
+      padding: 0;
+      font-size: 1.08rem;
+      line-height: 1.7;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Hero */
+    header {
+      padding: 3.5rem 0 3rem 0;
+      text-align: center;
+      background: var(--white);
+    }
+
+    .logo {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+      border-radius: 50%;
+      border: 3px solid var(--green);
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: #444;
+      margin: 0 0 1.5rem 0;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-subtitle strong {
+      color: var(--black);
+    }
+
+    .hero-cta {
+      display: inline-block;
+      background: var(--green);
+      color: var(--black);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-decoration: none;
+      padding: 1rem 2rem;
+      border-radius: 2rem;
+      margin: 1.5rem 0;
+      transition: background 0.15s, transform 0.15s;
+    }
+
+    .hero-cta:hover {
+      background: var(--yellow);
+      transform: translateY(-2px);
+    }
+
+    .editor-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--gray);
+      border: 1px solid var(--border);
+      border-radius: 2rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .editor-badge a {
+      color: var(--green);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .editor-badge a:hover {
+      text-decoration: underline;
+    }
+
+    /* Stats Section */
+    .stats-section {
+      background: var(--black);
+      color: var(--white);
+      padding: 2.5rem 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      text-align: center;
+    }
+
+    .stat-item {
+      padding: 0.5rem;
+    }
+
+    .stat-number {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--yellow);
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-top: 0.25rem;
+    }
+
+    .stat-context {
+      font-size: 0.75rem;
+      color: var(--green);
+      margin-top: 0.15rem;
+    }
+
+    /* Sample Preview */
+    .preview-section {
+      padding: 3rem 0;
+      background: var(--white);
+      text-align: center;
+    }
+
+    .preview-section h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.5rem;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .preview-section .subtitle {
+      color: #666;
+      margin-bottom: 1.5rem;
+    }
+
+    .preview-image {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .preview-image img {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 0.75rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    }
+
+    /* Why Section */
+    .why-section {
+      padding: 3.5rem 0;
+      background: var(--gray);
+    }
+
+    .why-section h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.5rem;
+      margin: 0 0 2rem 0;
+      text-align: center;
+    }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .why-card {
+      background: var(--white);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .why-card h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      margin: 0 0 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .why-card h3::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+    }
+
+    .why-card p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    /* Testimonials */
+    .testimonials-section {
+      padding: 3.5rem 0;
+      background: var(--white);
+    }
+
+    .testimonials-section h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.5rem;
+      margin: 0 0 2rem 0;
+      text-align: center;
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+
+    .testimonial-card {
+      background: var(--gray);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .testimonial-metric {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--black);
+      margin-bottom: 0.25rem;
+    }
+
+    .testimonial-metric-label {
+      font-size: 0.8rem;
+      color: var(--green);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.75rem;
+    }
+
+    .testimonial-quote {
+      font-size: 0.95rem;
+      color: #555;
+      line-height: 1.5;
+      margin: 0 0 0.75rem 0;
+      flex-grow: 1;
+    }
+
+    .testimonial-company {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--black);
+    }
+
+    /* Pricing Section */
+    .pricing-section {
+      padding: 3.5rem 0;
+      background: var(--gray);
+    }
+
+    .pricing-section h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.5rem;
+      margin: 0 0 0.5rem 0;
+      text-align: center;
+    }
+
+    .pricing-section .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    .pricing-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .pricing-card {
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: 1.25rem;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pricing-card.featured {
+      border-color: var(--green);
+      position: relative;
+    }
+
+    .pricing-card.featured::before {
+      content: 'MOST POPULAR';
+      position: absolute;
+      top: -0.75rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--green);
+      color: var(--black);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      letter-spacing: 0.5px;
+    }
+
+    .pricing-card h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .pricing-card .slots {
+      font-size: 0.85rem;
+      color: #888;
+      margin-bottom: 1rem;
+    }
+
+    .price-tag {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.75rem;
+      font-weight: 700;
+      color: var(--black);
+      line-height: 1;
+      margin-bottom: 1.25rem;
+    }
+
+    .price-tag span {
+      font-size: 1rem;
+      color: #888;
+      font-weight: 400;
+    }
+
+    .pricing-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.5rem 0;
+      flex-grow: 1;
+    }
+
+    .pricing-card li {
+      padding: 0.4rem 0;
+      padding-left: 1.25rem;
+      position: relative;
+      font-size: 0.95rem;
+      color: #444;
+    }
+
+    .pricing-card li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    .cta-button {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: var(--green);
+      color: var(--black);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: none;
+      border-radius: 2rem;
+      padding: 1rem 1.5rem;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.15s;
+    }
+
+    .cta-button:hover {
+      background: var(--yellow);
+      transform: translateY(-1px);
+    }
+
+    .cta-button.secondary {
+      background: var(--black);
+      color: var(--white);
+    }
+
+    .cta-button.secondary:hover {
+      background: #333;
+    }
+
+    .refund-note {
+      text-align: center;
+      color: #666;
+      font-size: 0.9rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0;
+    }
+
+    /* Final CTA */
+    .final-cta {
+      padding: 4rem 0;
+      background: var(--black);
+      text-align: center;
+      color: var(--white);
+    }
+
+    .final-cta h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.75rem;
+      margin: 0 0 0.5rem 0;
+      color: var(--white);
+    }
+
+    .final-cta p {
+      color: #aaa;
+      margin-bottom: 1.5rem;
+    }
+
+    .final-cta .cta-button {
+      display: inline-block;
+      width: auto;
+      padding: 1rem 2.5rem;
+      font-size: 1rem;
+    }
+
+    /* Footer */
+    footer {
+      padding: 1.5rem 0;
+      text-align: center;
+      color: #888;
+      font-size: 0.85rem;
+      background: var(--black);
+      border-top: 1px solid #333;
+    }
+
+    footer a {
+      color: #aaa;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--green);
+    }
+
+    /* Mobile Sticky CTA */
+    .mobile-sticky-cta {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      padding: 0.75rem 1rem;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+      text-align: center;
+    }
+
+    .mobile-sticky-cta .cta-button {
+      display: inline-block;
+      width: auto;
+      padding: 0.75rem 2rem;
+      font-size: 0.85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      h1 { font-size: 1.9rem; }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+      }
+
+      .stat-number { font-size: 1.75rem; }
+
+      .why-grid,
+      .testimonials-grid,
+      .pricing-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .pricing-card.featured::before {
+        top: -0.6rem;
+      }
+
+      .mobile-sticky-cta {
+        display: block;
+      }
+
+      footer {
+        padding-bottom: 5rem;
+      }
+
+      .final-cta {
+        padding-bottom: 6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <header>
+    <div class="container">
+      <img src="reco-logo.jpg" alt="Recomendo Logo" class="logo">
+      <h1>Reach <span id="hero-subscribers">122,000+</span> Curious Minds</h1>
+      <p class="hero-subtitle">Advertise in <strong>Recomendo</strong>, the weekly newsletter trusted for honest recommendations on tools, ideas, and products.</p>
+      <a href="booking.html" class="hero-cta">See Available Dates &rarr;</a>
+      <div class="editor-badge">
+        Curated by the founders of Wired & Boing Boing · <a href="https://recomendo.com" target="_blank" rel="noopener">See a recent issue</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number" id="stat-subscribers">122,000+</div>
+          <div class="stat-label">Subscribers</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="stat-openrate">46%</div>
+          <div class="stat-label">Open Rate</div>
+          <div class="stat-context">2× industry avg</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">500</div>
+          <div class="stat-label">Issues Sent</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">9+</div>
+          <div class="stat-label">Years Running</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sample Preview -->
+  <section class="preview-section">
+    <div class="container">
+      <h2>See How Ads Appear</h2>
+      <p class="subtitle">Clean, native placement that readers actually engage with</p>
+      <div class="preview-image">
+        <img src="sample-ad-preview.jpg" alt="Sample of ads in Recomendo newsletter">
+      </div>
+    </div>
+  </section>
+
+  <!-- Why It Works -->
+  <section class="why-section">
+    <div class="container">
+      <h2>Why Recomendo Works</h2>
+      <div class="why-grid">
+        <div class="why-card">
+          <h3>High-Trust Audience</h3>
+          <p>Readers subscribe because they trust the editors' taste. That trust extends to sponsors—your ad gets a warm reception.</p>
+        </div>
+        <div class="why-card">
+          <h3>Exceptional Engagement</h3>
+          <p>46% open rates and strong click-throughs. Our readers actually read the newsletter, not just skim it.</p>
+        </div>
+        <div class="why-card">
+          <h3>Limited Ad Inventory</h3>
+          <p>Only one sponsor and a handful of classifieds per issue. Your message won't compete with a wall of ads.</p>
+        </div>
+        <div class="why-card">
+          <h3>Measurable Results</h3>
+          <p>Sponsors consistently report strong ROI—signups, subscribers, and sales they can trace directly back.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials-section">
+    <div class="container">
+      <h2>Results From Real Advertisers</h2>
+      <div class="testimonials-grid" id="testimonials-container">
+        <div class="testimonial-card">
+          <div class="testimonial-metric">1,000</div>
+          <div class="testimonial-metric-label">Clicks (5× estimate)</div>
+          <p class="testimonial-quote">"This placement generated nearly 1,000 clicks—5× more than estimated. Those clicks yielded over 105 subscribers."</p>
+          <div class="testimonial-company">Brad's Deals</div>
+        </div>
+        <div class="testimonial-card">
+          <div class="testimonial-metric">$1/click</div>
+          <div class="testimonial-metric-label">Cost per click</div>
+          <p class="testimonial-quote">"It ran very smoothly, and we liked the quality of the newsletter. We got the clicks expected—around $1 per click."</p>
+          <div class="testimonial-company">Growth HQ</div>
+        </div>
+        <div class="testimonial-card">
+          <div class="testimonial-metric">6 signups</div>
+          <div class="testimonial-metric-label">One became a customer</div>
+          <p class="testimonial-quote">"We received six signups from this sponsorship and one already turned into a customer!"</p>
+          <div class="testimonial-company">Gerger LLC</div>
+        </div>
+        <div class="testimonial-card">
+          <div class="testimonial-metric">49%</div>
+          <div class="testimonial-metric-label">Open rate achieved</div>
+          <p class="testimonial-quote">"We saw 39,512 opens, a 49% open rate, and 233 clicks. Very happy with the performance for the rate."</p>
+          <div class="testimonial-company">Resortpass</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="pricing-section">
+    <div class="container">
+      <h2>Simple Pricing</h2>
+      <p class="subtitle">Book online in minutes. Ad copy due Friday noon PT for Sunday's issue.</p>
+      <div class="pricing-cards">
+        <div class="pricing-card featured">
+          <h3>Premium Sponsorship</h3>
+          <div class="slots">1 spot per issue</div>
+          <div class="price-tag">$500 <span>/ issue</span></div>
+          <ul>
+            <li>Featured above all other ads</li>
+            <li>280 characters + one link</li>
+            <li>Typically 800–1,200+ clicks</li>
+            <li>Maximum visibility</li>
+          </ul>
+          <a href="booking.html" class="cta-button">Book Sponsorship</a>
+        </div>
+        <div class="pricing-card">
+          <h3>Unclassified Ad</h3>
+          <div class="slots">10 spots per issue</div>
+          <div class="price-tag">$200 <span>/ issue</span></div>
+          <ul>
+            <li>Appears in Unclassifieds section</li>
+            <li>280 characters + one link</li>
+            <li>Typically 100–600+ clicks</li>
+            <li>Great for testing</li>
+          </ul>
+          <a href="booking.html" class="cta-button secondary">Place Unclassified</a>
+        </div>
+      </div>
+      <p class="refund-note">If your ad doesn't meet our guidelines, you'll receive a full refund.</p>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="final-cta">
+    <div class="container">
+      <h2>Ready to Reach Our Readers?</h2>
+      <p>Spots fill up weeks in advance. Book your date now.</p>
+      <a href="booking.html" class="cta-button">View Available Dates</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>Questions? <a href="mailto:editor@cool-tools.org">editor@cool-tools.org</a> · © 2026 <a href="https://recomendo.com" target="_blank" rel="noopener">Recomendo / Cool Tools Lab</a></p>
+    </div>
+  </footer>
+
+  <!-- Mobile Sticky CTA -->
+  <div class="mobile-sticky-cta">
+    <a href="booking.html" class="cta-button">Book Your Ad</a>
+  </div>
+
+  <script>
+    // Load config from worker and update page dynamically
+    fetch('https://recomendo-ads-checkout.markfrauenfelder.workers.dev/config')
+      .then(response => response.json())
+      .then(config => {
+        document.getElementById('hero-subscribers').textContent = config.stats.subscribers;
+        document.getElementById('stat-subscribers').textContent = config.stats.subscribers;
+        document.getElementById('stat-openrate').textContent = config.stats.openRate;
+      })
+      .catch(err => console.log('Config load error:', err));
+  </script>
+</body>
+</html>

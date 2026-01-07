@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — Recomendo Advertising</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --yellow: #ffe600;
+      --yellow-dark: #e6c200;
+      --green: #8fd14f;
+      --green-dark: #7ac043;
+      --black: #181818;
+      --white: #fff;
+      --gray: #f7f9fa;
+      --gray-dark: #e8ecee;
+      --border: #e0e6d9;
+      --red: #e74c3c;
+      --red-light: #fdf2f2;
+    }
+
+    html { box-sizing: border-box; }
+    *, *:before, *:after { box-sizing: inherit; }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: var(--gray);
+      color: var(--black);
+      margin: 0;
+      padding: 0;
+      font-size: 1rem;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Layout */
+    .page-layout {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      min-height: 100vh;
+    }
+
+    @media (max-width: 900px) {
+      .page-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left Column - Form */
+    .form-column {
+      padding: 3rem;
+      max-width: 600px;
+    }
+
+    @media (max-width: 900px) {
+      .form-column {
+        padding: 1.5rem;
+        max-width: none;
+      }
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--black);
+      margin-bottom: 2.5rem;
+    }
+
+    .logo {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid var(--green);
+    }
+
+    .logo-text {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+
+    h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .page-subtitle {
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    /* Form Styles */
+    .form-section {
+      margin-bottom: 2rem;
+    }
+
+    .form-section h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0 0 1rem 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #555;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 500px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+
+    label .required {
+      color: var(--red);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="url"],
+    textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-family: inherit;
+      font-size: 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 0.5rem;
+      background: var(--white);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(143, 209, 79, 0.2);
+    }
+
+    input.error,
+    textarea.error {
+      border-color: var(--red);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 0.3rem;
+    }
+
+    .char-count.warning {
+      color: var(--yellow-dark);
+    }
+
+    .char-count.over {
+      color: var(--red);
+      font-weight: 600;
+    }
+
+    .field-hint {
+      font-size: 0.85rem;
+      color: #888;
+      margin-top: 0.3rem;
+    }
+
+    .error-message {
+      color: var(--red);
+      font-size: 0.85rem;
+      margin-top: 0.3rem;
+    }
+
+    /* Ad Copy Cards */
+    .ad-copy-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .ad-copy-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--gray-dark);
+    }
+
+    .ad-copy-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .ad-copy-meta {
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    .ad-type-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2em 0.6em;
+      border-radius: 0.3em;
+      text-transform: uppercase;
+    }
+
+    .ad-type-badge.premium {
+      background: var(--yellow);
+      color: var(--black);
+    }
+
+    .ad-type-badge.unclassified {
+      background: var(--gray-dark);
+      color: #555;
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 1rem 2rem;
+      border-radius: 2rem;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.15s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: var(--black);
+      flex: 1;
+    }
+
+    .btn-primary:hover {
+      background: var(--yellow);
+    }
+
+    .btn-primary:disabled {
+      background: var(--gray-dark);
+      color: #999;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--black);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--black);
+    }
+
+    /* Notes */
+    .checkout-notes {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .checkout-notes ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .checkout-notes li {
+      margin-bottom: 0.5rem;
+    }
+
+    .checkout-notes a {
+      color: var(--black);
+    }
+
+    /* Right Column - Order Summary */
+    .summary-column {
+      background: var(--white);
+      padding: 3rem 2rem;
+      border-left: 1px solid var(--border);
+    }
+
+    @media (max-width: 900px) {
+      .summary-column {
+        border-left: none;
+        border-top: 1px solid var(--border);
+        padding: 2rem 1.5rem;
+      }
+    }
+
+    .summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .summary-header h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .hold-timer {
+      background: var(--red);
+      color: var(--white);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.3em 0.7em;
+      border-radius: 0.3em;
+    }
+
+    .hold-timer.warning {
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Order Items */
+    .order-items {
+      margin-bottom: 1.5rem;
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 1rem;
+      background: var(--gray);
+      border-radius: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .order-item-info {
+      flex: 1;
+    }
+
+    .order-item-date {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .order-item-type {
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .order-item-price {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .order-item-remove {
+      background: none;
+      border: none;
+      color: #999;
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 0;
+      margin-left: 0.75rem;
+    }
+
+    .order-item-remove:hover {
+      color: var(--red);
+    }
+
+    /* Totals */
+    .order-totals {
+      border-top: 2px solid var(--black);
+      padding-top: 1rem;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+    }
+
+    .total-row.grand-total {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .total-row.grand-total .total-amount {
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    /* Empty Cart */
+    .empty-cart {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #888;
+    }
+
+    .empty-cart p {
+      margin-bottom: 1.5rem;
+    }
+
+    /* Loading State */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.9);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid var(--gray-dark);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      margin-top: 1rem;
+      font-weight: 600;
+      color: #555;
+    }
+
+    /* Writing Tips */
+    .writing-tips {
+      background: #fffef5;
+      border: 1.5px solid #f0e68c;
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .writing-tips h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin: 0 0 0.75rem 0;
+      color: #8b7500;
+    }
+    .writing-tips ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      font-size: 0.9rem;
+      color: #555;
+    }
+    .writing-tips li {
+      margin-bottom: 0.4rem;
+    }
+    .writing-tips code {
+      background: #fff;
+      padding: 0.1em 0.4em;
+      border-radius: 3px;
+      font-size: 0.85em;
+      color: #8b7500;
+    }
+
+    /* Ad Preview */
+    .ad-preview-section {
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px dashed var(--border);
+    }
+    .ad-preview-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin-bottom: 0.5rem;
+    }
+    .ad-preview-box {
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      min-height: 60px;
+    }
+    .ad-preview-box .ad-text {
+      color: #333;
+    }
+    .ad-preview-box .ad-text strong {
+      font-weight: 700;
+    }
+    .ad-preview-box .ad-link {
+      color: var(--green);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .ad-preview-box .placeholder-text {
+      color: #bbb;
+      font-style: italic;
+    }
+
+    /* Formatting toolbar */
+    .format-toolbar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .format-btn {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .format-btn:hover {
+      background: #eee;
+      border-color: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-layout">
+    <!-- Form Column -->
+    <div class="form-column">
+      <a href="advertise.html" class="logo-link">
+        <img src="reco-logo.jpg" alt="Recomendo" class="logo">
+        <span class="logo-text">Recomendo</span>
+      </a>
+
+      <h1>Checkout</h1>
+      <p class="page-subtitle">Complete your ad booking below.</p>
+
+      <form id="checkoutForm">
+        <!-- Contact Info -->
+        <div class="form-section">
+          <h2>Your Details</h2>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Your Name <span class="required">*</span></label>
+              <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+              <label for="email">Email <span class="required">*</span></label>
+              <input type="email" id="email" name="email" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="company">Company / Product Name</label>
+            <input type="text" id="company" name="company">
+          </div>
+        </div>
+
+        <!-- Ad Copy Section -->
+        <div class="form-section">
+          <h2>Ad Copy</h2>
+
+          <div class="writing-tips">
+            <h3>Writing Tips</h3>
+            <ul>
+              <li><strong>Bold your product name</strong> — Use <code>**double asterisks**</code> around text to make it bold (e.g., <code>**Acme Widget**</code>)</li>
+              <li><strong>Add your link</strong> — Use <code>[[double brackets]]</code> around the words you want as your clickable link (e.g., <code>[[Try it free]]</code>)</li>
+              <li><strong>Keep it conversational</strong> — Write like you're recommending to a friend, matching Recomendo's tone</li>
+              <li><strong>Lead with the benefit</strong> — What problem does your product solve?</li>
+              <li><strong>You can edit later</strong> — We'll send you a confirmation email with your ad copy. Reply to make changes before your issue date.</li>
+            </ul>
+          </div>
+
+          <p class="field-hint" style="margin-top: 0; margin-bottom: 1rem;">Enter the copy and URL for each ad you're booking. Max 280 characters per ad.</p>
+
+          <div id="adCopyFields">
+            <!-- Ad copy fields will be generated here -->
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="btn-row">
+          <a href="booking.html" class="btn btn-secondary">← Back</a>
+          <button type="submit" class="btn btn-primary" id="submitBtn">Proceed to Payment →</button>
+        </div>
+
+        <div class="checkout-notes">
+          <ul>
+            <li>You'll be redirected to Stripe for secure payment.</li>
+            <li>Your ad copy will be reviewed and published on the scheduled date.</li>
+            <li>All purchases are subject to our <a href="terms.html">advertising terms</a>.</li>
+          </ul>
+        </div>
+      </form>
+    </div>
+
+    <!-- Order Summary Column -->
+    <div class="summary-column">
+      <div class="summary-header">
+        <h2>Order Summary</h2>
+        <span class="hold-timer" id="holdTimer">Held for 15:00</span>
+      </div>
+
+      <div id="orderSummary">
+        <!-- Order items will be rendered here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Redirecting to payment...</div>
+  </div>
+
+  <script>
+    // ============================================
+    // CONFIGURATION
+    // ============================================
+
+    const CONFIG = {
+      // Your Stripe publishable key (client-side safe)
+      stripePublicKey: 'pk_test_51SN9Tj6R8SGo5Uk02eTLv6zsMh6nBa9cfZHa3Zt7DRrKdsa3lLNyU2j5DwDCGN5NmQfPUNSvubKxfgG9b8bAvdEl00FHD6WCL5',
+
+      // Your checkout API endpoint (Cloudflare Worker, etc.)
+      checkoutApiUrl: 'https://recomendo-ads-checkout.markfrauenfelder.workers.dev/create-checkout',
+
+      // Hold time in minutes
+      holdTimeMinutes: 15,
+
+      // Prices (must match Stripe products)
+      prices: {
+        premium: 500,
+        unclassified: 200
+      }
+    };
+
+    // ============================================
+    // STATE
+    // ============================================
+
+    let cart = [];
+    let holdStartTime = null;
+    let timerInterval = null;
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+
+    function init() {
+      loadCart();
+
+      if (cart.length === 0) {
+        showEmptyCart();
+        return;
+      }
+
+      renderOrderSummary();
+      renderAdCopyFields();
+      startHoldTimer();
+
+      document.getElementById('checkoutForm').addEventListener('submit', handleSubmit);
+    }
+
+    function loadCart() {
+      const saved = localStorage.getItem('recomendo_cart');
+      if (saved) {
+        cart = JSON.parse(saved);
+      }
+
+      // Load or set hold start time
+      const savedHoldTime = localStorage.getItem('recomendo_hold_start');
+      if (savedHoldTime) {
+        holdStartTime = parseInt(savedHoldTime, 10);
+      } else {
+        holdStartTime = Date.now();
+        localStorage.setItem('recomendo_hold_start', holdStartTime.toString());
+      }
+    }
+
+    function saveCart() {
+      localStorage.setItem('recomendo_cart', JSON.stringify(cart));
+    }
+
+    function clearCart() {
+      cart = [];
+      localStorage.removeItem('recomendo_cart');
+      localStorage.removeItem('recomendo_hold_start');
+    }
+
+    // ============================================
+    // RENDERING
+    // ============================================
+
+    function renderOrderSummary() {
+      const container = document.getElementById('orderSummary');
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+      container.innerHTML = `
+        <div class="order-items">
+          ${cart.map(item => `
+            <div class="order-item">
+              <div class="order-item-info">
+                <div class="order-item-date">${item.dateFormatted}</div>
+                <div class="order-item-type">${item.type === 'premium' ? 'Premium Sponsorship' : 'Unclassified Ad'} · #${item.issueNumber}</div>
+              </div>
+              <div class="order-item-price">$${item.price}</div>
+              <button type="button" class="order-item-remove" onclick="removeFromCart('${item.id}')" title="Remove">×</button>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="order-totals">
+          <div class="total-row grand-total">
+            <span>Total</span>
+            <span class="total-amount">$${total}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAdCopyFields() {
+      const container = document.getElementById('adCopyFields');
+
+      container.innerHTML = cart.map((item, index) => `
+        <div class="ad-copy-card" data-item-id="${item.id}">
+          <div class="ad-copy-header">
+            <div>
+              <div class="ad-copy-title">${item.dateFormatted}</div>
+              <div class="ad-copy-meta">Issue #${item.issueNumber}</div>
+            </div>
+            <span class="ad-type-badge ${item.type}">${item.type === 'premium' ? 'Premium' : 'Unclassified'}</span>
+          </div>
+
+          <div class="form-group">
+            <label for="adCopy_${index}">Ad Copy <span class="required">*</span></label>
+            <textarea
+              id="adCopy_${index}"
+              name="adCopy_${index}"
+              data-item-id="${item.id}"
+              maxlength="280"
+              required
+              placeholder="Write your ad copy here (280 characters max)...&#10;&#10;Example: **Acme Widget** makes organizing your life effortless. Join 50,000+ happy users. [[Try it free]]"
+              oninput="updateCharCount(this); updatePreview(${index})"
+            ></textarea>
+            <div class="char-count" id="charCount_${index}">0 / 280</div>
+          </div>
+
+          <div class="form-group">
+            <label for="adUrl_${index}">Destination URL <span class="required">*</span></label>
+            <input
+              type="text"
+              id="adUrl_${index}"
+              name="adUrl_${index}"
+              data-item-id="${item.id}"
+              required
+              placeholder="your-link.com"
+              onblur="normalizeUrl(this)"
+              oninput="updatePreview(${index})"
+            >
+            <div class="field-hint">Where your [[link]] will go when clicked</div>
+          </div>
+
+          <div class="ad-preview-section">
+            <div class="ad-preview-label">Live Preview</div>
+            <div class="ad-preview-box" id="preview_${index}">
+              <span class="placeholder-text">Your formatted ad will appear here as you type...</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showEmptyCart() {
+      document.querySelector('.form-column').innerHTML = `
+        <a href="advertise.html" class="logo-link">
+          <img src="reco-logo.jpg" alt="Recomendo" class="logo">
+          <span class="logo-text">Recomendo</span>
+        </a>
+        <div class="empty-cart">
+          <h1>Your Cart is Empty</h1>
+          <p>You haven't selected any ad slots yet.</p>
+          <a href="booking.html" class="btn btn-primary">Browse Available Slots</a>
+        </div>
+      `;
+
+      document.getElementById('orderSummary').innerHTML = `
+        <div class="empty-cart">
+          <p>No items in cart</p>
+        </div>
+      `;
+
+      document.getElementById('holdTimer').style.display = 'none';
+    }
+
+    // ============================================
+    // CART FUNCTIONS
+    // ============================================
+
+    function removeFromCart(itemId) {
+      cart = cart.filter(item => item.id !== itemId);
+      saveCart();
+
+      if (cart.length === 0) {
+        showEmptyCart();
+      } else {
+        renderOrderSummary();
+        renderAdCopyFields();
+      }
+    }
+
+    // ============================================
+    // TIMER
+    // ============================================
+
+    function startHoldTimer() {
+      updateTimerDisplay();
+      timerInterval = setInterval(updateTimerDisplay, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const elapsed = Date.now() - holdStartTime;
+      const remaining = (CONFIG.holdTimeMinutes * 60 * 1000) - elapsed;
+
+      const timerEl = document.getElementById('holdTimer');
+
+      if (remaining <= 0) {
+        timerEl.textContent = 'Expired';
+        timerEl.classList.add('warning');
+        clearInterval(timerInterval);
+        // Optionally clear cart and redirect
+        // clearCart();
+        // window.location.href = 'booking.html';
+        return;
+      }
+
+      const minutes = Math.floor(remaining / 60000);
+      const seconds = Math.floor((remaining % 60000) / 1000);
+      timerEl.textContent = `Held for ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+      if (remaining < 2 * 60 * 1000) {
+        timerEl.classList.add('warning');
+      }
+    }
+
+    // ============================================
+    // FORM HANDLING
+    // ============================================
+
+    function updateCharCount(textarea) {
+      const index = textarea.id.split('_')[1];
+      const countEl = document.getElementById(`charCount_${index}`);
+      const count = textarea.value.length;
+
+      countEl.textContent = `${count} / 280`;
+      countEl.classList.remove('warning', 'over');
+
+      if (count > 280) {
+        countEl.classList.add('over');
+      } else if (count > 250) {
+        countEl.classList.add('warning');
+      }
+    }
+
+    function updatePreview(index) {
+      try {
+        const adCopyEl = document.getElementById('adCopy_' + index);
+        const adUrlEl = document.getElementById('adUrl_' + index);
+        const previewEl = document.getElementById('preview_' + index);
+
+        if (!adCopyEl || !previewEl) return;
+
+        const adCopy = adCopyEl.value;
+        const adUrl = adUrlEl ? adUrlEl.value.trim() : '';
+
+        if (!adCopy.trim()) {
+          previewEl.innerHTML = '<span style="color:#bbb;font-style:italic;">Your formatted ad will appear here as you type...</span>';
+          return;
+        }
+
+        // Escape HTML to prevent XSS
+        var escaped = adCopy.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        // Replace **text** with <strong>text</strong>
+        escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+        // Replace [[text]] with link
+        if (adUrl) {
+          var safeUrl = adUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+          escaped = escaped.replace(/\[\[(.+?)\]\]/g, '<a href="' + safeUrl + '" style="color:#8fd14f;text-decoration:underline;">$1</a>');
+        } else {
+          escaped = escaped.replace(/\[\[(.+?)\]\]/g, '<span style="color:#8fd14f;text-decoration:underline;">$1</span>');
+        }
+
+        // Build the preview HTML with inline styles
+        previewEl.innerHTML = '<span style="color:#333;">' + escaped + '</span>';
+      } catch (err) {
+        console.error('Preview error:', err);
+      }
+    }
+
+    function normalizeUrl(input) {
+      let url = input.value.trim();
+      if (!url) return;
+
+      // If no protocol, add https://
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+      }
+
+      input.value = url;
+    }
+
+    function isValidUrl(string) {
+      try {
+        const url = new URL(string);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+      } catch (_) {
+        return false;
+      }
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+
+      // Validate form
+      const form = e.target;
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      // Normalize and validate all URLs
+      let urlsValid = true;
+      cart.forEach((item, index) => {
+        const urlInput = document.getElementById(`adUrl_${index}`);
+        normalizeUrl(urlInput); // Add https:// if missing
+
+        if (!isValidUrl(urlInput.value)) {
+          urlInput.classList.add('error');
+          urlsValid = false;
+        } else {
+          urlInput.classList.remove('error');
+        }
+      });
+
+      if (!urlsValid) {
+        alert('Please enter valid URLs for all ads (e.g., example.com or https://example.com)');
+        return;
+      }
+
+      // Collect form data
+      const formData = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        company: document.getElementById('company').value || '',
+        items: cart.map((item, index) => ({
+          ...item,
+          adCopy: document.getElementById(`adCopy_${index}`).value,
+          adUrl: document.getElementById(`adUrl_${index}`).value
+        }))
+      };
+
+      // Show loading
+      document.getElementById('loadingOverlay').classList.add('active');
+      document.getElementById('submitBtn').disabled = true;
+
+      try {
+        // Send to checkout API
+        const response = await fetch(CONFIG.checkoutApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) {
+          throw new Error('Checkout failed');
+        }
+
+        const { checkoutUrl } = await response.json();
+
+        // Store order data for confirmation page
+        localStorage.setItem('recomendo_pending_order', JSON.stringify(formData));
+
+        // Redirect to Stripe Checkout
+        window.location.href = checkoutUrl;
+
+      } catch (error) {
+        console.error('Checkout error:', error);
+        alert('There was a problem processing your order. Please try again or contact us for help.');
+        document.getElementById('loadingOverlay').classList.remove('active');
+        document.getElementById('submitBtn').disabled = false;
+      }
+    }
+
+    // ============================================
+    // INIT
+    // ============================================
+
+    init();
+  </script>
+
+</body>
+</html>
