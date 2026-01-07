@@ -43,6 +43,22 @@ const SITE_CONFIG = {
   cancelUrl: 'https://recomendo-ads.pages.dev/checkout.html',
 };
 
+// Issue number reference point: Jan 4, 2026 = Issue #496
+const ISSUE_REFERENCE = {
+  date: '2026-01-04',
+  number: 496
+};
+
+// Calculate issue number from a date string (YYYY-MM-DD)
+function getIssueNumber(dateStr) {
+  if (!dateStr) return '?';
+  const refDate = new Date(ISSUE_REFERENCE.date + 'T00:00:00');
+  const targetDate = new Date(dateStr + 'T00:00:00');
+  const diffTime = targetDate.getTime() - refDate.getTime();
+  const diffWeeks = Math.round(diffTime / (7 * 24 * 60 * 60 * 1000));
+  return ISSUE_REFERENCE.number + diffWeeks;
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -678,7 +694,7 @@ async function handleAdminOrders(request, env) {
           customerEmail: meta.customer_email || session.customer_email || '',
           company: meta.company || '',
           type: item.type || 'unclassified',
-          issueNumber: item.issueNumber || '?',
+          issueNumber: getIssueNumber(item.dateStr || item.date) || item.issueNumber || '?',
           dateFormatted: item.dateFormatted || '',
           issueDate: item.dateStr || item.date || '',
           adCopy,
@@ -715,7 +731,7 @@ async function handleAdminOrders(request, env) {
         customerEmail: legacyOrder.customerEmail,
         company: legacyOrder.company || '',
         type: legacyOrder.type,
-        issueNumber: legacyOrder.issueNumber,
+        issueNumber: getIssueNumber(legacyOrder.dateStr) || legacyOrder.issueNumber,
         dateFormatted: legacyOrder.dateFormatted,
         issueDate: legacyOrder.dateStr,
         adCopy,
@@ -833,9 +849,9 @@ async function handleInventory(request, env) {
         // Skip cancelled ads
         if (cancelledAds.includes(adId)) continue;
 
-        // Use issue number as key (more reliable than date which has timezone issues)
-        const issueNum = String(item.issueNumber);
-        if (!issueNum || issueNum === 'undefined') continue;
+        // Calculate issue number from date
+        const issueNum = String(getIssueNumber(item.dateStr || item.date) || item.issueNumber);
+        if (!issueNum || issueNum === 'undefined' || issueNum === '?') continue;
 
         if (!inventory[issueNum]) {
           inventory[issueNum] = { premium: false, unclassified: 0 };
@@ -855,8 +871,9 @@ async function handleInventory(request, env) {
       // Skip cancelled legacy ads
       if (cancelledAds.includes(legacyOrder.adId)) continue;
 
-      const issueNum = String(legacyOrder.issueNumber);
-      if (!issueNum || issueNum === 'undefined') continue;
+      // Calculate issue number from date
+      const issueNum = String(getIssueNumber(legacyOrder.dateStr) || legacyOrder.issueNumber);
+      if (!issueNum || issueNum === 'undefined' || issueNum === '?') continue;
 
       if (!inventory[issueNum]) {
         inventory[issueNum] = { premium: false, unclassified: 0 };
