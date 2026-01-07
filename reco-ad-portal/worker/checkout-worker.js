@@ -547,7 +547,7 @@ async function sendNotificationEmail(env, orderData, session) {
     body: JSON.stringify({
       from: 'Recomendo <ads@recommendo.org>',
       to: email,
-      reply_to: env.NOTIFICATION_EMAIL || 'editor@kk.org',
+      reply_to: env.NOTIFICATION_EMAIL || 'editor@cool-tools.org',
       subject: `Your Recomendo Ad Booking Confirmation — $${total}`,
       html: customerHtml,
     })
@@ -1022,7 +1022,7 @@ const DEFAULT_CONFIG = {
     unclassified: 200
   },
   contact: {
-    email: "editor@kk.org"
+    email: "editor@cool-tools.org"
   },
   testimonials: [
     {
