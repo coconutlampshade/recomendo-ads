@@ -726,14 +726,9 @@
         cart = JSON.parse(saved);
       }
 
-      // Load or set hold start time
-      const savedHoldTime = localStorage.getItem('recomendo_hold_start');
-      if (savedHoldTime) {
-        holdStartTime = parseInt(savedHoldTime, 10);
-      } else {
-        holdStartTime = Date.now();
-        localStorage.setItem('recomendo_hold_start', holdStartTime.toString());
-      }
+      // Always reset hold timer when checkout page loads
+      holdStartTime = Date.now();
+      localStorage.setItem('recomendo_hold_start', holdStartTime.toString());
     }
 
     function saveCart() {

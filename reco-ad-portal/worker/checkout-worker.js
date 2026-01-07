@@ -188,6 +188,7 @@ async function handleCreateCheckout(request, env) {
       mode: 'payment',
       customer_email: email,
       line_items: lineItems,
+      allow_promotion_codes: true,
       success_url: `${SITE_CONFIG.successUrl}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: SITE_CONFIG.cancelUrl,
       metadata: {
