@@ -217,6 +217,7 @@ async function handleCreateCheckout(request, env) {
       },
       // Store full order data in payment intent metadata too (truncated to 500 chars)
       payment_intent_data: {
+        receipt_email: email,  // Send Stripe receipt to customer
         metadata: {
           full_order: JSON.stringify({ name, email, company, items }).substring(0, 500),
         }
@@ -408,7 +409,8 @@ async function verifyStripeWebhook(payload, signature, secret) {
  */
 async function sendNotificationEmail(env, orderData, session) {
   const { name, email, company, items } = orderData;
-  const total = items.reduce((sum, item) => sum + item.price, 0);
+  // Use actual amount paid from Stripe (accounts for discounts), fallback to item sum
+  const total = session.amount_total ? (session.amount_total / 100) : items.reduce((sum, item) => sum + item.price, 0);
   const orderDate = new Date().toLocaleDateString('en-US', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
