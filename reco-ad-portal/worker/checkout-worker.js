@@ -196,7 +196,7 @@ async function handleCreateCheckout(request, env) {
     // Store order details in metadata (Stripe limits metadata to 500 chars per value)
     // We'll store a summary and send full details via webhook
     const orderSummary = items.map(item =>
-      `${item.type === 'premium' ? 'Premium' : 'Unclassified'} - Issue #${item.issueNumber} (${item.dateFormatted})`
+      `${item.type === 'premium' ? 'Premium' : 'Unclassified'} - Issue #${getIssueNumber(item.dateStr) || item.issueNumber} (${item.dateFormatted})`
     ).join('; ');
 
     // Create Stripe Checkout Session
@@ -408,7 +408,12 @@ async function verifyStripeWebhook(payload, signature, secret) {
  * Send notification email via Resend
  */
 async function sendNotificationEmail(env, orderData, session) {
-  const { name, email, company, items } = orderData;
+  const { name, email, company } = orderData;
+  // Recalculate issue numbers from dates (in case cart had wrong numbers)
+  const items = orderData.items.map(item => ({
+    ...item,
+    issueNumber: getIssueNumber(item.dateStr) || item.issueNumber
+  }));
   // Use actual amount paid from Stripe (accounts for discounts), fallback to item sum
   const total = session.amount_total ? (session.amount_total / 100) : items.reduce((sum, item) => sum + item.price, 0);
   const orderDate = new Date().toLocaleDateString('en-US', {
