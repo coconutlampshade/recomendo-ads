@@ -33,8 +33,8 @@
 
 // Stripe Price IDs (update these with your actual Stripe Price IDs)
 const STRIPE_PRICES = {
-  premium: 'price_1Si0nA8bKnIf7MRSVevFoTtZ',      // $500 Premium Sponsorship
-  unclassified: 'price_1Si0nt8bKnIf7MRSupMjUBNB'  // $200 Unclassified Ad
+  premium: 'price_1SmpCa8bKnIf7MRSzQl8f1u9',      // $500 Premium Sponsorship (LIVE)
+  unclassified: 'price_1SmpCu8bKnIf7MRSAmqS6zUh'  // $200 Unclassified Ad (LIVE)
 };
 
 // Your site URLs
@@ -42,6 +42,22 @@ const SITE_CONFIG = {
   successUrl: 'https://recomendo-ads.pages.dev/success.html',
   cancelUrl: 'https://recomendo-ads.pages.dev/checkout.html',
 };
+
+// Issue number reference point: Jan 4, 2026 = Issue #496
+const ISSUE_REFERENCE = {
+  date: '2026-01-04',
+  number: 496
+};
+
+// Calculate issue number from a date string (YYYY-MM-DD)
+function getIssueNumber(dateStr) {
+  if (!dateStr) return '?';
+  const refDate = new Date(ISSUE_REFERENCE.date + 'T00:00:00');
+  const targetDate = new Date(dateStr + 'T00:00:00');
+  const diffTime = targetDate.getTime() - refDate.getTime();
+  const diffWeeks = Math.round(diffTime / (7 * 24 * 60 * 60 * 1000));
+  return ISSUE_REFERENCE.number + diffWeeks;
+}
 
 export default {
   async fetch(request, env) {
@@ -109,6 +125,14 @@ export default {
       }
     }
 
+    if (url.pathname === '/admin/add-legacy' && request.method === 'POST') {
+      return handleAddLegacy(request, env);
+    }
+
+    if (url.pathname === '/admin/legacy-orders' && request.method === 'GET') {
+      return handleGetLegacyOrders(request, env);
+    }
+
     return new Response('Not Found', { status: 404 });
   }
 };
@@ -172,7 +196,7 @@ async function handleCreateCheckout(request, env) {
     // Store order details in metadata (Stripe limits metadata to 500 chars per value)
     // We'll store a summary and send full details via webhook
     const orderSummary = items.map(item =>
-      `${item.type === 'premium' ? 'Premium' : 'Unclassified'} - Issue #${item.issueNumber} (${item.dateFormatted})`
+      `${item.type === 'premium' ? 'Premium' : 'Unclassified'} - Issue #${getIssueNumber(item.dateStr) || item.issueNumber} (${item.dateFormatted})`
     ).join('; ');
 
     // Create Stripe Checkout Session
@@ -180,6 +204,7 @@ async function handleCreateCheckout(request, env) {
       mode: 'payment',
       customer_email: email,
       line_items: lineItems,
+      allow_promotion_codes: true,
       success_url: `${SITE_CONFIG.successUrl}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: SITE_CONFIG.cancelUrl,
       metadata: {
@@ -190,10 +215,11 @@ async function handleCreateCheckout(request, env) {
         // Store full order as JSON (will be truncated if too long)
         order_data: JSON.stringify(items).substring(0, 500),
       },
-      // Store full order data in payment intent metadata too
+      // Store full order data in payment intent metadata too (truncated to 500 chars)
       payment_intent_data: {
+        receipt_email: email,  // Send Stripe receipt to customer
         metadata: {
-          full_order: JSON.stringify({ name, email, company, items }),
+          full_order: JSON.stringify({ name, email, company, items }).substring(0, 500),
         }
       }
     });
@@ -382,8 +408,14 @@ async function verifyStripeWebhook(payload, signature, secret) {
  * Send notification email via Resend
  */
 async function sendNotificationEmail(env, orderData, session) {
-  const { name, email, company, items } = orderData;
-  const total = items.reduce((sum, item) => sum + item.price, 0);
+  const { name, email, company } = orderData;
+  // Recalculate issue numbers from dates (in case cart had wrong numbers)
+  const items = orderData.items.map(item => ({
+    ...item,
+    issueNumber: getIssueNumber(item.dateStr) || item.issueNumber
+  }));
+  // Use actual amount paid from Stripe (accounts for discounts), fallback to item sum
+  const total = session.amount_total ? (session.amount_total / 100) : items.reduce((sum, item) => sum + item.price, 0);
   const orderDate = new Date().toLocaleDateString('en-US', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
@@ -538,7 +570,7 @@ async function sendNotificationEmail(env, orderData, session) {
     body: JSON.stringify({
       from: 'Recomendo <ads@recommendo.org>',
       to: email,
-      reply_to: env.NOTIFICATION_EMAIL || 'editor@kk.org',
+      reply_to: env.NOTIFICATION_EMAIL || 'editor@cool-tools.org',
       subject: `Your Recomendo Ad Booking Confirmation — $${total}`,
       html: customerHtml,
     })
@@ -612,7 +644,6 @@ async function handleAdminOrders(request, env) {
 
     const data = await response.json();
     const orders = [];
-    let totalRevenue = 0;
 
     // Get cancelled ads list
     const cancelledAds = await getCancelledAds(env);
@@ -627,7 +658,6 @@ async function handleAdminOrders(request, env) {
       if (session.payment_status !== 'paid') continue;
 
       const meta = session.metadata || {};
-      totalRevenue += (session.amount_total || 0) / 100;
 
       // Parse order data from metadata
       let items = [];
@@ -671,7 +701,7 @@ async function handleAdminOrders(request, env) {
           customerEmail: meta.customer_email || session.customer_email || '',
           company: meta.company || '',
           type: item.type || 'unclassified',
-          issueNumber: item.issueNumber || '?',
+          issueNumber: getIssueNumber(item.dateStr || item.date) || item.issueNumber || '?',
           dateFormatted: item.dateFormatted || '',
           issueDate: item.dateStr || item.date || '',
           adCopy,
@@ -684,6 +714,44 @@ async function handleAdminOrders(request, env) {
           reportData: reportSent || null
         });
       }
+    }
+
+    // Add legacy orders (paid outside of Stripe)
+    const legacyOrders = await getLegacyOrders(env);
+    for (const legacyOrder of legacyOrders) {
+      // Skip cancelled legacy ads
+      if (cancelledAds.includes(legacyOrder.adId)) continue;
+
+      // Apply any edits
+      const edit = editedAds[legacyOrder.adId];
+      const adCopy = edit?.adCopy || legacyOrder.adCopy || '';
+      const adUrl = edit?.adUrl || legacyOrder.adUrl || '';
+      const notes = edit?.notes || '';
+
+      // Check report status
+      const reportSent = sentReports[legacyOrder.adId];
+
+      orders.push({
+        adId: legacyOrder.adId,
+        sessionId: legacyOrder.legacyId,
+        customerName: legacyOrder.customerName,
+        customerEmail: legacyOrder.customerEmail,
+        company: legacyOrder.company || '',
+        type: legacyOrder.type,
+        issueNumber: getIssueNumber(legacyOrder.dateStr) || legacyOrder.issueNumber,
+        dateFormatted: legacyOrder.dateFormatted,
+        issueDate: legacyOrder.dateStr,
+        adCopy,
+        adUrl,
+        notes,
+        price: legacyOrder.price,
+        paidAt: legacyOrder.paidAt,
+        edited: !!edit,
+        reportSent: !!reportSent,
+        reportData: reportSent || null,
+        isLegacy: true,
+        paymentMethod: legacyOrder.paymentMethod || 'legacy'
+      });
     }
 
     // Split into upcoming and past ads
@@ -710,11 +778,15 @@ async function handleAdminOrders(request, env) {
     // Sort past orders by date descending (most recent first)
     pastOrders.sort((a, b) => new Date(b.issueDate) - new Date(a.issueDate));
 
+    // Calculate stats from actual filtered orders (not raw Stripe data)
+    const allOrders = [...upcomingOrders, ...pastOrders];
+    const totalRevenue = allOrders.reduce((sum, order) => sum + (order.price || 0), 0);
+
     return new Response(JSON.stringify({
       orders: upcomingOrders,
       pastOrders: pastOrders,
       stats: {
-        totalOrders: data.data.length,
+        totalOrders: allOrders.length,
         totalRevenue: totalRevenue,
         upcomingAds: upcomingOrders.length,
         pastAds: pastOrders.length
@@ -784,9 +856,9 @@ async function handleInventory(request, env) {
         // Skip cancelled ads
         if (cancelledAds.includes(adId)) continue;
 
-        // Use issue number as key (more reliable than date which has timezone issues)
-        const issueNum = String(item.issueNumber);
-        if (!issueNum || issueNum === 'undefined') continue;
+        // Calculate issue number from date
+        const issueNum = String(getIssueNumber(item.dateStr || item.date) || item.issueNumber);
+        if (!issueNum || issueNum === 'undefined' || issueNum === '?') continue;
 
         if (!inventory[issueNum]) {
           inventory[issueNum] = { premium: false, unclassified: 0 };
@@ -797,6 +869,27 @@ async function handleInventory(request, env) {
         } else if (item.type === 'unclassified') {
           inventory[issueNum].unclassified++;
         }
+      }
+    }
+
+    // Include legacy orders in inventory
+    const legacyOrders = await getLegacyOrders(env);
+    for (const legacyOrder of legacyOrders) {
+      // Skip cancelled legacy ads
+      if (cancelledAds.includes(legacyOrder.adId)) continue;
+
+      // Calculate issue number from date
+      const issueNum = String(getIssueNumber(legacyOrder.dateStr) || legacyOrder.issueNumber);
+      if (!issueNum || issueNum === 'undefined' || issueNum === '?') continue;
+
+      if (!inventory[issueNum]) {
+        inventory[issueNum] = { premium: false, unclassified: 0 };
+      }
+
+      if (legacyOrder.type === 'premium') {
+        inventory[issueNum].premium = true;
+      } else if (legacyOrder.type === 'unclassified') {
+        inventory[issueNum].unclassified++;
       }
     }
 
@@ -953,7 +1046,7 @@ const DEFAULT_CONFIG = {
     unclassified: 200
   },
   contact: {
-    email: "editor@kk.org"
+    email: "editor@cool-tools.org"
   },
   testimonials: [
     {
@@ -1028,6 +1121,7 @@ async function handleBackup(request, env) {
     const backup = {
       exportedAt: new Date().toISOString(),
       completedOrders: [],
+      legacyOrders: [],
       cancelledAds: [],
       editedAds: {},
       siteConfig: null
@@ -1042,6 +1136,10 @@ async function handleBackup(request, env) {
           backup.completedOrders.push(JSON.parse(orderData));
         }
       }
+
+      // Get legacy orders
+      const legacyJson = await env.ORDERS_KV.get('legacy_orders');
+      backup.legacyOrders = legacyJson ? JSON.parse(legacyJson) : [];
 
       // Get cancelled ads
       const cancelledJson = await env.ORDERS_KV.get('cancelled_ads');
@@ -1257,6 +1355,126 @@ async function handleSendReport(request, env) {
   } catch (error) {
     console.error('Send report error:', error);
     return new Response(JSON.stringify({ error: 'Failed to send report' }), {
+      status: 500,
+      headers: corsHeaders()
+    });
+  }
+}
+
+/**
+ * Get legacy orders from KV
+ */
+async function getLegacyOrders(env) {
+  if (!env.ORDERS_KV) return [];
+  const legacyJson = await env.ORDERS_KV.get('legacy_orders');
+  return legacyJson ? JSON.parse(legacyJson) : [];
+}
+
+/**
+ * Add a legacy order (paid outside of Stripe)
+ */
+async function handleAddLegacy(request, env) {
+  if (request.method === 'OPTIONS') {
+    return handleCors();
+  }
+
+  // Check authorization
+  const authHeader = request.headers.get('Authorization');
+  const password = authHeader?.replace('Bearer ', '');
+
+  if (!password || password !== env.ADMIN_PASSWORD) {
+    return new Response('Unauthorized', {
+      status: 401,
+      headers: corsHeaders()
+    });
+  }
+
+  try {
+    const { customerName, customerEmail, company, type, issueNumber, dateStr, dateFormatted, adCopy, adUrl, price, paidAt, paymentMethod } = await request.json();
+
+    // Validate required fields
+    if (!customerEmail || !type || !issueNumber || !adCopy || !adUrl) {
+      return new Response(JSON.stringify({ error: 'Missing required fields: customerEmail, type, issueNumber, adCopy, adUrl' }), {
+        status: 400,
+        headers: corsHeaders()
+      });
+    }
+
+    if (!env.ORDERS_KV) {
+      return new Response(JSON.stringify({ error: 'KV storage not available' }), {
+        status: 500,
+        headers: corsHeaders()
+      });
+    }
+
+    // Generate a unique legacy ID
+    const legacyId = `legacy_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
+    // Create the legacy order object
+    const legacyOrder = {
+      adId: `${legacyId}_0_${dateStr || issueNumber}`,
+      legacyId,
+      customerName: customerName || 'Unknown',
+      customerEmail,
+      company: company || '',
+      type: type || 'unclassified',
+      issueNumber,
+      dateStr: dateStr || '',
+      dateFormatted: dateFormatted || '',
+      adCopy,
+      adUrl,
+      price: price || (type === 'premium' ? 500 : 200),
+      paidAt: paidAt || new Date().toISOString(),
+      paymentMethod: paymentMethod || 'legacy',
+      isLegacy: true,
+      addedAt: new Date().toISOString()
+    };
+
+    // Get existing legacy orders and add the new one
+    const legacyOrders = await getLegacyOrders(env);
+    legacyOrders.push(legacyOrder);
+    await env.ORDERS_KV.put('legacy_orders', JSON.stringify(legacyOrders));
+
+    return new Response(JSON.stringify({ success: true, order: legacyOrder }), {
+      headers: corsHeaders()
+    });
+
+  } catch (error) {
+    console.error('Add legacy error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to add legacy order' }), {
+      status: 500,
+      headers: corsHeaders()
+    });
+  }
+}
+
+/**
+ * Get all legacy orders (admin only)
+ */
+async function handleGetLegacyOrders(request, env) {
+  if (request.method === 'OPTIONS') {
+    return handleCors();
+  }
+
+  // Check authorization
+  const authHeader = request.headers.get('Authorization');
+  const password = authHeader?.replace('Bearer ', '');
+
+  if (!password || password !== env.ADMIN_PASSWORD) {
+    return new Response('Unauthorized', {
+      status: 401,
+      headers: corsHeaders()
+    });
+  }
+
+  try {
+    const legacyOrders = await getLegacyOrders(env);
+    return new Response(JSON.stringify({ orders: legacyOrders }), {
+      headers: corsHeaders()
+    });
+  } catch (error) {
+    console.error('Get legacy orders error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to get legacy orders' }), {
       status: 500,
       headers: corsHeaders()
     });
