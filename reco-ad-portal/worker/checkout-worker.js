@@ -659,21 +659,33 @@ async function handleAdminOrders(request, env) {
 
       const meta = session.metadata || {};
 
-      // Parse order data from metadata
+      // Try to get complete order data from KV first (stored permanently by webhook)
       let items = [];
-      try {
-        items = JSON.parse(meta.order_data || '[]');
-      } catch (e) {
-        // If we can't parse items, create a basic entry from summary
-        if (meta.order_summary) {
-          items = [{
-            type: 'unknown',
-            issueNumber: '?',
-            dateFormatted: meta.order_summary,
-            adCopy: 'See email for details',
-            adUrl: '',
-            price: (session.amount_total || 0) / 100
-          }];
+      let orderData = null;
+      if (env.ORDERS_KV) {
+        const stored = await env.ORDERS_KV.get(`completed_${session.id}`);
+        if (stored) {
+          orderData = JSON.parse(stored);
+          items = orderData.items || [];
+        }
+      }
+
+      // Fallback to metadata if KV not available
+      if (!items.length) {
+        try {
+          items = JSON.parse(meta.order_data || '[]');
+        } catch (e) {
+          // If we can't parse items, create a basic entry from summary
+          if (meta.order_summary) {
+            items = [{
+              type: 'unknown',
+              issueNumber: '?',
+              dateFormatted: meta.order_summary,
+              adCopy: 'See email for details',
+              adUrl: '',
+              price: (session.amount_total || 0) / 100
+            }];
+          }
         }
       }
 
@@ -840,12 +852,23 @@ async function handleInventory(request, env) {
 
       const meta = session.metadata || {};
 
-      // Parse order data from metadata
+      // Try to get complete order data from KV first
       let items = [];
-      try {
-        items = JSON.parse(meta.order_data || '[]');
-      } catch (e) {
-        continue;
+      if (env.ORDERS_KV) {
+        const stored = await env.ORDERS_KV.get(`completed_${session.id}`);
+        if (stored) {
+          const orderData = JSON.parse(stored);
+          items = orderData.items || [];
+        }
+      }
+
+      // Fallback to metadata if KV not available
+      if (!items.length) {
+        try {
+          items = JSON.parse(meta.order_data || '[]');
+        } catch (e) {
+          continue;
+        }
       }
 
       for (let i = 0; i < items.length; i++) {
