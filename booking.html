@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Issue numbers: Jan 4, 2026 = #496, calculated from referenceDate -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -588,7 +589,7 @@
   </div>
 
   <footer>
-    <p>Questions? Email <a href="mailto:editor@kk.org">editor@kk.org</a> · <a href="advertise.html">Back to Ad Info</a></p>
+    <p>Questions? Email <a href="mailto:editor@cool-tools.org">editor@cool-tools.org</a> · <a href="advertise.html">Back to Ad Info</a></p>
   </footer>
 
   <script>
@@ -597,8 +598,9 @@
     // ============================================
 
     const CONFIG = {
-      // Starting issue number
-      startingIssueNumber: 542,
+      // Reference point for issue numbering: Jan 4, 2026 = Issue #496
+      referenceDate: '2026-01-04',
+      referenceIssueNumber: 496,
 
       // Number of weeks to show
       weeksToShow: 52,
@@ -640,6 +642,14 @@
       return `${year}-${month}-${day}`;
     }
 
+    // Calculate issue number from date
+    function getIssueNumber(date) {
+      const refDate = new Date(CONFIG.referenceDate + 'T00:00:00');
+      const diffTime = date.getTime() - refDate.getTime();
+      const diffWeeks = Math.round(diffTime / (7 * 24 * 60 * 60 * 1000));
+      return CONFIG.referenceIssueNumber + diffWeeks;
+    }
+
     // Generate issue dates (Sundays)
     function generateIssueDates(count) {
       const issues = [];
@@ -657,7 +667,7 @@
         issues.push({
           date: issueDate,
           dateStr: toLocalDateStr(issueDate),
-          issueNumber: CONFIG.startingIssueNumber + i
+          issueNumber: getIssueNumber(issueDate)
         });
       }
 
