@@ -10,6 +10,10 @@ compatibility_date = "2024-01-01"
 binding = "ORDERS_KV"
 id = "234065765b53429da31028bf7ab5d753"
 
+# Cron trigger for daily backup emails (8 AM UTC = midnight PST)
+[triggers]
+crons = ["0 8 * * *"]
+
 # Environment variables (set these in Cloudflare dashboard for security)
 # [vars]
 # NOTIFICATION_EMAIL = "editor@cool-tools.org"

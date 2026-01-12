@@ -134,6 +134,11 @@ export default {
     }
 
     return new Response('Not Found', { status: 404 });
+  },
+
+  // Scheduled event handler for daily backups (runs via cron trigger)
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(sendDailyBackupEmail(env));
   }
 };
 
@@ -1501,5 +1506,119 @@ async function handleGetLegacyOrders(request, env) {
       status: 500,
       headers: corsHeaders()
     });
+  }
+}
+
+/**
+ * Send daily backup email (triggered by cron)
+ */
+async function sendDailyBackupEmail(env) {
+  try {
+    const backup = {
+      exportedAt: new Date().toISOString(),
+      completedOrders: [],
+      legacyOrders: [],
+      cancelledAds: [],
+      editedAds: {},
+      sentReports: {},
+      siteConfig: null
+    };
+
+    if (env.ORDERS_KV) {
+      // Get all completed orders from KV
+      const ordersList = await env.ORDERS_KV.list({ prefix: 'completed_' });
+      for (const key of ordersList.keys) {
+        const orderData = await env.ORDERS_KV.get(key.name);
+        if (orderData) {
+          backup.completedOrders.push(JSON.parse(orderData));
+        }
+      }
+
+      // Get legacy orders
+      const legacyJson = await env.ORDERS_KV.get('legacy_orders');
+      backup.legacyOrders = legacyJson ? JSON.parse(legacyJson) : [];
+
+      // Get cancelled ads
+      const cancelledJson = await env.ORDERS_KV.get('cancelled_ads');
+      backup.cancelledAds = cancelledJson ? JSON.parse(cancelledJson) : [];
+
+      // Get edited ads
+      const editsJson = await env.ORDERS_KV.get('edited_ads');
+      backup.editedAds = editsJson ? JSON.parse(editsJson) : {};
+
+      // Get sent reports
+      const reportsJson = await env.ORDERS_KV.get('sent_reports');
+      backup.sentReports = reportsJson ? JSON.parse(reportsJson) : {};
+
+      // Get site config
+      const configJson = await env.ORDERS_KV.get('site_config');
+      backup.siteConfig = configJson ? JSON.parse(configJson) : DEFAULT_CONFIG;
+    }
+
+    const backupJson = JSON.stringify(backup, null, 2);
+    const dateStr = new Date().toISOString().split('T')[0];
+    const totalOrders = backup.completedOrders.length + backup.legacyOrders.length;
+
+    // Create a summary for the email body
+    const summaryHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;margin:0;padding:20px;">
+  <div style="max-width:600px;margin:0 auto;background:white;border-radius:8px;overflow:hidden;">
+    <div style="background:#8fd14f;padding:20px;text-align:center;">
+      <h1 style="margin:0;color:#181818;font-size:22px;">Daily Backup Report</h1>
+      <p style="margin:8px 0 0;color:#181818;">${dateStr}</p>
+    </div>
+    <div style="padding:24px;">
+      <h2 style="margin:0 0 16px;font-size:16px;color:#333;">Backup Summary</h2>
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="padding:8px 0;border-bottom:1px solid #eee;">Stripe Orders</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right;font-weight:600;">${backup.completedOrders.length}</td></tr>
+        <tr><td style="padding:8px 0;border-bottom:1px solid #eee;">Legacy Orders</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right;font-weight:600;">${backup.legacyOrders.length}</td></tr>
+        <tr><td style="padding:8px 0;border-bottom:1px solid #eee;">Cancelled Ads</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right;font-weight:600;">${backup.cancelledAds.length}</td></tr>
+        <tr><td style="padding:8px 0;border-bottom:1px solid #eee;">Edited Ads</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right;font-weight:600;">${Object.keys(backup.editedAds).length}</td></tr>
+        <tr><td style="padding:8px 0;border-bottom:1px solid #eee;">Reports Sent</td><td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right;font-weight:600;">${Object.keys(backup.sentReports).length}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;">Total Orders</td><td style="padding:8px 0;text-align:right;font-weight:700;color:#8fd14f;">${totalOrders}</td></tr>
+      </table>
+      <p style="margin:24px 0 0;color:#666;font-size:14px;">The complete backup JSON is attached to this email.</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    // Send the backup email with attachment
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Recomendo Ads <ads@recommendo.org>',
+        to: env.NOTIFICATION_EMAIL || 'editor@cool-tools.org',
+        subject: `Recomendo Ads Backup — ${dateStr} (${totalOrders} orders)`,
+        html: summaryHtml,
+        attachments: [
+          {
+            filename: `recomendo-backup-${dateStr}.json`,
+            content: btoa(unescape(encodeURIComponent(backupJson)))
+          }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('Backup email failed:', error);
+      throw new Error(`Failed to send backup email: ${error}`);
+    }
+
+    console.log(`Daily backup email sent successfully: ${totalOrders} orders`);
+
+  } catch (error) {
+    console.error('Daily backup error:', error);
+    throw error;
   }
 }
